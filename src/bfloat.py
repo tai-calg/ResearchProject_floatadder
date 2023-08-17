@@ -1,23 +1,43 @@
 import numpy as np
 import tensorflow as tf
+import convert_type as ct
 
-w_np = np.loadtxt('w_value.txt', delimiter=',')
-b_np = np.loadtxt('b_value.txt', delimiter=',')
-
-print(w_np)
-print(type(w_np), type(w_np[0]))
-
-w_b = tf.cast(w_np, tf.bfloat16)
-b_b = tf.cast(b_np, tf.bfloat16)
-
-print(type(w_b), type(w_b[0]))
+## read w_value_bin.txt as string list
+with open('w_value_bin.txt', 'r') as file:
+    bin_values = file.read().strip().split(',')
+## any bin_values , ct.bin_to_bf16
+w_np = np.array(list(map(lambda x: ct.bin_to_bf16(x), bin_values)))
+# w_np = np.loadtxt('w_value_bin.txt', delimiter=',')
 
 
-w_b_np = w_b.numpy()
-b_b_np = b_b.numpy()
 
-print(type(w_b_np[0]))
-print(w_b_np)
+
+w_tf = tf.cast(w_np, tf.bfloat16) # 意味はないと思うが、正しさのために一応tfのbfloat16に変換
+print(type(w_tf), type(w_tf[0]))
+print("tf shape is",w_tf.shape)
+
+##  [ w_tf[i] + w_tf[i+1] ) for i in range(0, len(w_tf), 2)]
+# 偶数インデックスの要素をスライシングで取得
+evens = w_tf[0::2] # [start:stop:step]
+# 奇数インデックスの要素をスライシングで取得
+odds = w_tf[1::2]
+# 要素ごとの加算
+result_tf = tf.add(evens, odds)
+assert result_tf.shape == (5000,)
+
+
+
+
+
+w_bin_np = result_tf.numpy()
+
+## any w_bin_np , ct.bf16_to_bin() as string list
+w_bin_list = list(map(lambda x: ct.bf16_to_bin(x), w_bin_np))
+## write w_bin_np to w_b_value_bin.txt
+with open('w_tf_add_result.txt', 'w') as f:
+    f.write(','.join(w_bin_list))
+
+print(type(w_bin_np[0]))
 
 ###
 """

@@ -1,5 +1,5 @@
 use std::cmp;
-
+use std::fs;
 
 // TODO:
 /*
@@ -8,25 +8,54 @@ use std::cmp;
     の16bitをランダム生成にして、10000回ほどループで回して,それをassert_eq!で比較する.
 */
 fn main() {
-    let input1:u32 = 0b1_01111110_0000101; // bfloat16 
-    let input2:u32 = 0b0_01111110_0000011; // bfloat16
-    println!("### float adder ###");
-    println!("input1: {:0>16b}", input1);
-    println!("input2: {:0>16b}", input2);
+    // let input1:u32 = 0b1_01111110_0000101; // bfloat16 
+    // let input2:u32 = 0b0_01111110_0000011; // bfloat16 
+    let contents = fs::read_to_string("src/w_value_bin.txt")
+        .expect("Something went wrong reading the file");
 
-    let output = float_adder_run(input1, input2);
-    println!("output: {:0>16b}", output);
+    // 文字列の前後の空白を削除し、カンマで分割する
+    let bin_values: Vec<u32> = contents.trim().split(',')
+    .filter_map(|s| u32::from_str_radix(s, 2).ok())
+    .collect();
+    assert_eq!(0b0000_0000_0111_1111 , u32::from_str_radix("0000000001111111", 2).unwrap());
 
-    println!("### float adder by ieee ###");
-    let ieeef32_1 = ieee_to_f32( bfloat16_to_ieee(input1 as u16) );
-    let ieeef32_2 = ieee_to_f32( bfloat16_to_ieee(input2 as u16) );
-    println!("ieeef32_1: {}", ieeef32_1);
-    println!("ieeef32_2: {}", ieeef32_2);
-    let res_f32 = ieeef32_1 + ieeef32_2;
-    let res_u32 = f32_to_ieee(res_f32);
-    println!("res_f32: {}", res_f32);
-    println!("res_u32: {:0>32b}",  res_u32);
-    assert_eq!(output, res_u32 >> 16);
+    // println!("### float adder ###"); //res: 0.015625 * 2^(0) = 0.015625 //下駄によりexpは-126 する。
+    // println!("input1: {:0>16b}", input1);
+    // println!("input2: {:0>16b}", input2);
+
+    //// for i ,i+1 ; 0 ~ bin_values.len() - 1 ; i+=2; bin_values[i] , bin_values[i+1]
+    let mut output_list = Vec::new();
+    for i in (0..bin_values.len()).step_by(2) {
+        // println!("### float adder ###"); //res: 0.015625 * 2^(0) = 0.015625 //下駄によりexpは-126 する。
+        // println!("input1: {:0>16b}", bin_values[i]);
+        // println!("input2: {:0>16b}", bin_values[i+1]);
+        let output = float_adder_run(bin_values[i], bin_values[i+1]);
+        output_list.push(output);
+
+    }
+
+    //// write to file as segment is ","
+    let mut output_str = String::new();
+    for i in 0..output_list.len() {
+        output_str.push_str(&format!("{:0>16b}", output_list[i]));
+        if i != output_list.len() - 1 {
+            output_str.push_str(",");
+        }
+    }
+    fs::write("src/w_self_add_result.txt", output_str).expect("Unable to write file");
+
+
+
+    // println!("### float adder by ieee ###");
+    // let ieeef32_1 = ieee_to_f32( bfloat16_to_ieee(input1 as u16) );
+    // let ieeef32_2 = ieee_to_f32( bfloat16_to_ieee(input2 as u16) );
+    // println!("ieeef32_1: {}", ieeef32_1);
+    // println!("ieeef32_2: {}", ieeef32_2);
+    // let res_f32 = ieeef32_1 + ieeef32_2;
+    // let res_u32 = f32_to_ieee(res_f32);
+    // println!("res_f32: {}", res_f32);
+    // println!("res_u32: {:0>32b}",  res_u32);
+    // assert_eq!(output, res_u32 >> 16);
 }
 
 
@@ -103,7 +132,7 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
     let add_result = fract_b + fract_a; // 桁上がりの含めて9bit
     let sub_result = fract_b - fract_a; // 桁上がりの含めて9bit
     // println!("add_result: {}", add_result);
-    println!("sub_result: {:0>16b}", sub_result);
+    // println!("sub_result: {:0>16b}", sub_result);
         
     //xnor sign for mux selector
     let selector = !(sign_a ^ sign_b);

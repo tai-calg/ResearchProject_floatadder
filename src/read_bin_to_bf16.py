@@ -1,45 +1,26 @@
-def binary_to_bfloat16(binary_string):
-    # 符号ビットを取得
-    sgn = int(binary_string[0])
+import convert_type as ct
+if __name__ == '__main__':
+    import os
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(script_dir, 'w_value_bin.txt')
+        # filepath = トップディレクトリからの相対パス（どこから実行しても同じパスになるので便利）
 
-    # 指数部を取得し、10進数に変換
-    exp = int(binary_string[1:9], 2)
+    with open(file_path, 'r') as file:
+        bin_values = file.read().strip().split(',')
 
-    # 仮数部を取得し、10進数に変換
-    fract = int(binary_string[9:], 2)
-    # print("fract",fract)
+    # 各バイナリ列をbfloat16形式の浮動小数点数に変換
+    f_vals = [ct.bin_to_bf16(binary) for binary in bin_values]
+    # f_vals = [bin_to_bf16(binary) for binary in ['1111011011001010','0100001001101101']]
 
-    # bfloat16から浮動小数点数に変換
-    if exp == 255:
-        return float('inf') if fract == 0 else float('nan')
-    if exp == 0:
-        return 0.0
-
-    # 符号部の計算
-    sign = -1 if sgn else 1
-
-    # 仮数部の計算
-    fraction = (1 + fract / 128.0) #正しい
-    # print("fraction", fraction)
-
-    # 指数部の計算
-    exponent = exp - 126
-
-    # 浮動小数点数に変換
-    float_value = sign * (fraction) * (2 ** exponent)
-
-    return float_value
+# a+b
+    sum_binary_strings = [ ct.bf16_to_bin(f_vals[i] + f_vals[i+1] ) for i in range(0, len(f_vals), 2)]
+    assert len(sum_binary_strings) == 5000
 
 
-# テキストファイルからバイナリ列を読み込み
-with open('w_value_bin.txt', 'r') as file:
-    binary_values = file.read().strip().split(',')
-
-# 各バイナリ列をbfloat16形式の浮動小数点数に変換
-# float_values = [binary_to_bfloat16(binary) for binary in binary_values]
-float_values = [binary_to_bfloat16(binary) for binary in ['1111011011001010','0100001001101101']]
-
-# 結果を出力
-for value in float_values:
-    print(value)
-    # continue
+    # Write the result to a file
+    with open('add_results.txt', 'w') as f:
+        f.write(','.join(sum_binary_strings))
+    # 結果を出力
+    # for value in f_vals:
+    #     print(value)
+        # continue
