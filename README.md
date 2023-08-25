@@ -12,3 +12,8 @@ tensorflow version == 2.13.0
 3. w_value_bin.txt のbit列を次は自分の組んだモジュール(論理回路の処理を仮想的に表現したもの)で加算。
 4. 3.の結果はそのままbit列なので、それをw_self_add_result.txtに書く。
 5. 最後に2.,4.で作ったtxtが全て正しいか比較する。
+
+gen_random_bin.py  ==>     bfloat.py     ==>    main.rs     ==>  compare_txt.py 
+    ↓                           ↓                 |
+w_value_bin.txt -----> w_tf_add_result.txt        ↓
+    L------------------------>      w_self_add_result.txt

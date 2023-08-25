@@ -13,8 +13,8 @@ w_np = np.array(list(map(lambda x: ct.bin_to_bf16(x), bin_values)))
 
 
 w_tf = tf.cast(w_np, tf.bfloat16) # 意味はないと思うが、正しさのために一応tfのbfloat16に変換
-print(type(w_tf), type(w_tf[0]))
-print("tf shape is",w_tf.shape)
+# print(type(w_tf), type(w_tf[0]))
+# print("tf shape is",w_tf.shape)
 
 ##  [ w_tf[i] + w_tf[i+1] ) for i in range(0, len(w_tf), 2)]
 # 偶数インデックスの要素をスライシングで取得
