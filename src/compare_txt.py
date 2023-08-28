@@ -17,10 +17,17 @@ tf_path = os.path.join(script_dir, 'w_tf_add_result.txt')
 with open(tf_path, 'r') as file:
     tf_bin_strs = file.read().strip().split(',')
 
+
+# compare #
+count = 0
 for i in range(len(self_bin_strs)):
     if self_bin_strs[i] != tf_bin_strs[i]:
-        print("not corrected !!",i, self_bin_strs[i], tf_bin_strs[i])
+        count += 1
+        print("not corrected !!",i, \
+              "\n self is ", self_bin_strs[i][:1] , "_",self_bin_strs[i][1:9] , "_" , self_bin_strs[i][9:]  \
+              ,"\n tf is   ", tf_bin_strs[i][:1] , "_",tf_bin_strs[i][1:9] , "_" , tf_bin_strs[i][9:])
         continue
     else:
         continue
-    
+
+print("different count:", count)
