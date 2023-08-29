@@ -25,4 +25,4 @@ w_value_bin.txt -----> w_tf_add_result.txt        ↓
 まだmain.rsが238個間違った計算をしている。
 しかしそれはまだmain.rsがRound と 例外処理を入れてないからだと思いたい。
 
-tfがulp1足りない場合もあれば、selfがulp1足りない場合もあってよくわからん
+tfがulp1足りない場合(不要なところでselfが丸めで繰り上げしてる。)もあれば、selfがulp1足りない場合もあってよくわからん
