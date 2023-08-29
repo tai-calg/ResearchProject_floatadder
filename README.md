@@ -26,3 +26,21 @@ w_value_bin.txt -----> w_tf_add_result.txt        ↓
 しかしそれはまだmain.rsがRound と 例外処理を入れてないからだと思いたい。
 
 tfがulp1足りない場合(不要なところでselfが丸めで繰り上げしてる。)もあれば、selfがulp1足りない場合もあってよくわからん
+
+add/subをした後に先にNorm→例外検知→Roundの順。
+IF: Roundのせいで正規形でなくなったら、もう一度Normに戻す。
+
+```
+val    s_exponent_signcnd
++inf = 0_11111111_0000000
+-inf = 1_11111111_0000000
+
+val    s_exponent_signcnd
++NaN = 0_11111111_{not all 0}
+-NaN = 1_11111111_{not all 0}
+
+0    = 0 00000000 0000000 = 0
+0    = 1 00000000 0000000 = −0
+
+
+```

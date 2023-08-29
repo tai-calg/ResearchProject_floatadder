@@ -83,7 +83,7 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
     let mut fract_b = 0;
 
 
-    if (in_exp1 > in_exp2) {
+    if in_exp1 > in_exp2 {
         sign_b = in_sign1;
         exp_b = in_exp1;
         fract_b = in_fract1;
@@ -126,11 +126,13 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
     fract_a |= 0b0000_0000_1000_0000; //hidden bitを結合
     fract_b |= 0b0000_0000_1000_0000; //hidden bitを結合
 
-    fract_a = fract_a >> shift_val;
+    let overflow_mask:u32 = (1 << shift_val) - 1;
+    let overflowed_bits:u32 = fract_a & overflow_mask;
+    let shifted_fract_a = fract_a >> shift_val;
 
 // procedual 3 : add , sub 
-    let add_result = fract_b + fract_a; // 桁上がりの含めて9bit
-    let sub_result = fract_b - fract_a; // 桁上がりの含めて9bit
+    let add_result = fract_b + shifted_fract_a; // 桁上がりの含めて9bit
+    let sub_result = fract_b - shifted_fract_a; // 桁上がりの含めて9bit
     // println!("add_result: {}", add_result);
     // println!("sub_result: {:0>16b}", sub_result);
         
@@ -145,7 +147,7 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
      */
     let mut exp = exp_b;
     let mut fract = calc_result; //9bit
-    if (selector){ // add
+    if selector{ // add
         if (fract & 0b0000_0001_0000_0000) != 0 { // 9bit目が1の時(桁あがり)
             exp += 1;
             fract = fract >> 1;
@@ -153,13 +155,29 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
             // do nothing
         }
     }else { // sub
-        while((fract & 0b0000_0000_1000_0000) == 0){ // 8bit目が0の時(切り捨てる予定の整数部)
+        while(fract & 0b0000_0000_1000_0000) == 0 { // 8bit目が0の時(切り捨てる予定の整数部)
             exp -= 1; // max -7
             fract = fract << 1;
         }
     }
 
-// procedual 5 : final process 
+// procedual 5 : Round
+/*
+val    s_exponent_signcnd
++inf = 0_11111111_0000000
+-inf = 1_11111111_0000000
+
+val    s_exponent_signcnd
++NaN = 0_11111111_{not all 0}
+-NaN = 1_11111111_{not all 0}
+
+0    = 0 00000000 0000000 = 0
+0    = 1 00000000 0000000 = −0
+
+*/
+    //TODO:
+
+// procedual 6 : binding bits process 
     let exp_result = exp ;
     let fract_result = fract & 0b0000_0000_0111_1111; // 7bit
 
