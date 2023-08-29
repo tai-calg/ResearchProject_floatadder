@@ -20,8 +20,7 @@ fn main() {
     assert_eq!(0b0000_0000_0111_1111 , u32::from_str_radix("0000000001111111", 2).unwrap());
 
     // println!("### float adder ###"); //res: 0.015625 * 2^(0) = 0.015625 //下駄によりexpは-126 する。
-    // println!("input1: {:0>16b}", input1);
-    // println!("input2: {:0>16b}", input2);
+
 
     //// for i ,i+1 ; 0 ~ bin_values.len() - 1 ; i+=2; bin_values[i] , bin_values[i+1]
     let mut output_list = Vec::new();
@@ -147,7 +146,7 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
      */
     let mut exp = exp_b;
     let mut fract = calc_result; //9bit
-    if selector{ // add
+    if selector { // add
         if (fract & 0b0000_0001_0000_0000) != 0 { // 9bit目が1の時(桁あがり)
             exp += 1;
             fract = fract >> 1;
@@ -175,17 +174,25 @@ val    s_exponent_signcnd
 0    = 1 00000000 0000000 = −0
 
 */
-    //TODO:
+let exp_result = exp ;
+let fract_result = fract & 0b0000_0000_0111_1111; // 7bit
+// sgn_a and sgn_b 
+let sign_xnor = !(sign_a ^ sign_b);
+let sign_result = sign_b;
+
+if exp_result == 0b11111111 {
+        if fract_result == 0 {
+            // +inf or -inf
+            return (sign_result as u32) << 15 | 0b11111111_0000000;
+        }else{
+            // +NaN or -NaN
+            // tf ではNanは fract is {all 1}である。
+            return (sign_result as u32) << 15 | 0b11111111_1111111;
+        }
+    }
 
 // procedual 6 : binding bits process 
-    let exp_result = exp ;
-    let fract_result = fract & 0b0000_0000_0111_1111; // 7bit
 
-    // sgn_a and sgn_b 
-    let sign_and = sign_a & sign_b;
-    let sign_xor = sign_a ^ sign_b;
-    let is_minus = sign_and | sign_xor;
-    let sign_result =  is_minus & sign_b;
 
     //bind sgn | exp | fract
     let result = (sign_result as u32) << 15 | (exp_result << 7) | fract_result;

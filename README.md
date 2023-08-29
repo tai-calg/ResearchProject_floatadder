@@ -44,3 +44,13 @@ val    s_exponent_signcnd
 
 
 ```
+- tfは exp= 11111111 の時, fractは{all 0}(inf) or {all 1}(+/- Nan)しか出さない。
+
+- 8/29
+例外処理を実装。
+現時点で残ってるミス
+1. selfの方がulp 1大きい (why???)
+2. tfがinfになってるのにselfはexp=1111_1110でオーバーフローしてない (infであることをinfでないとして出力するのは問題)
+3. selfの方がulp 1小さい (Roundを実装してないからと予想してる)
+4. self=-Nan ,but tf=+Nan (!?)
+
