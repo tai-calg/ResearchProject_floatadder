@@ -3,7 +3,7 @@ import tensorflow as tf
 import convert_type as ct
 
 ## read w_value_bin.txt as string list
-with open('w_value_bin.txt', 'r') as file:
+with open('src/w_value_bin.txt', 'r') as file:
     bin_values = file.read().strip().split(',')
 ## any bin_values , ct.bin_to_bf16
 w_np = np.array(list(map(lambda x: ct.bin_to_bf16(x), bin_values)))
@@ -33,11 +33,11 @@ w_bin_np = result_tf.numpy()
 
 ## any w_bin_np , ct.bf16_to_bin() as string list
 w_bin_list = list(map(lambda x: ct.bf16_to_bin(x), w_bin_np))
-## write w_bin_np to w_b_value_bin.txt
+# write w_bin_np to w_b_value_bin.txt
 with open('w_tf_add_result.txt', 'w') as f:
     f.write(','.join(w_bin_list))
 
-print(type(w_bin_np[0]))
+print(type(w_bin_np[0])) # <class 'bfloat16'>
 
 ###
 """

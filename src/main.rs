@@ -136,7 +136,7 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
         round_bit = (overflowed_bits >> (shift_val-2) ) & 0b0001 == 1;
         sticky_mask = (1 << (shift_val-2)) - 1;
     }
-    let sticky_bit : bool = (overflowed_bits & sticky_mask) != 0b0;
+    let sticky_bit : bool = (overflowed_bits & sticky_mask) != 0b0000_00;
     let shifted_fract_a = fract_a >> shift_val;
 
 // procedual 3 : add , sub 
@@ -174,7 +174,6 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
 let mut exp_rou: u32 = exp ;
 let mut fract_rou = fract & 0b0000_0000_0111_1111; // 7bit
 // sgn_a and sgn_b 
-let sign_xnor = !(sign_a ^ sign_b);
 let sign_result = sign_b;
 
 let fr_all1:bool = fract_rou == 0b0000_0000_0111_1111;
@@ -182,7 +181,7 @@ let ulp:bool = (fract_rou & 0b0000_0000_0000_0001) == 0b0000_0000_0000_0001;
 
 // ### //
 
-// if guard_bit && (sticky_bit | round_bit | ulp) {
+// if guard_bit & (sticky_bit | round_bit | ulp) {
 //     fract_rou += 1;
 //     if fr_all1 {
 //         exp_rou += 1;
@@ -216,9 +215,9 @@ if exp_result == 0b11111111 {
             // +inf or -inf
             return (sign_result as u32) << 15 | 0b11111111_0000000;
         }else{
-            // +NaN or -NaN
+            // NaN
             // tf ではNanは fract is {all 1}である。
-            return (sign_result as u32) << 15 | 0b11111111_1111111;
+            return 0b011111111_1111111;
         }
     }
 
