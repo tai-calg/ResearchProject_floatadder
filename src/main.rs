@@ -1,7 +1,6 @@
 use std::cmp;
 use std::fs;
 
-// TODO:
 /*
     let input1:u32 = 0b1100_0000_1000_0101; // bfloat16 
     let input2:u32 = 0b0000_0110_1000_0011; // bfloat16
@@ -127,6 +126,17 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
 
     let overflow_mask:u32 = (1 << shift_val) - 1;
     let overflowed_bits:u32 = fract_a & overflow_mask;
+    let mut guard_bit : bool = false;
+    if shift_val >= 1 {
+        guard_bit = (overflowed_bits >> (shift_val-1) ) & 0b0001 == 1;
+    }
+    let mut round_bit : bool = false;
+    let mut sticky_mask:u32 = 0;
+    if shift_val >= 2 {
+        round_bit = (overflowed_bits >> (shift_val-2) ) & 0b0001 == 1;
+        sticky_mask = (1 << (shift_val-2)) - 1;
+    }
+    let sticky_bit : bool = (overflowed_bits & sticky_mask) != 0b0;
     let shifted_fract_a = fract_a >> shift_val;
 
 // procedual 3 : add , sub 
@@ -160,7 +170,30 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
         }
     }
 
-// procedual 5 : Round
+// procedual 5 : round
+let mut exp_rou: u32 = exp ;
+let mut fract_rou = fract & 0b0000_0000_0111_1111; // 7bit
+// sgn_a and sgn_b 
+let sign_xnor = !(sign_a ^ sign_b);
+let sign_result = sign_b;
+
+let fr_all1:bool = fract_rou == 0b0000_0000_0111_1111;
+let ulp:bool = (fract_rou & 0b0000_0000_0000_0001) == 0b0000_0000_0000_0001;
+
+// ### //
+
+// if guard_bit && (sticky_bit | round_bit | ulp) {
+//     fract_rou += 1;
+//     if fr_all1 {
+//         exp_rou += 1;
+//         fract_rou = 0;
+//     }
+// }
+
+// ### //
+
+
+// procedual 6 : 例外処理
 /*
 val    s_exponent_signcnd
 +inf = 0_11111111_0000000
@@ -174,10 +207,8 @@ val    s_exponent_signcnd
 0    = 1 00000000 0000000 = −0
 
 */
-let exp_result = exp ;
-let fract_result = fract & 0b0000_0000_0111_1111; // 7bit
-// sgn_a and sgn_b 
-let sign_xnor = !(sign_a ^ sign_b);
+let exp_result: u32 = exp_rou ;
+let fract_result = fract_rou & 0b0000_0000_0111_1111; // 7bit
 let sign_result = sign_b;
 
 if exp_result == 0b11111111 {
@@ -191,7 +222,8 @@ if exp_result == 0b11111111 {
         }
     }
 
-// procedual 6 : binding bits process 
+// procedual 7 : binding bits process 
+
 
 
     //bind sgn | exp | fract
