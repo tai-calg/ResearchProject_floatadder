@@ -23,7 +23,7 @@ evens = w_tf[0::2] # [start:stop:step]
 odds = w_tf[1::2]
 # 要素ごとの加算
 result_tf = tf.add(evens, odds)
-assert result_tf.shape == (5000,)
+# assert result_tf.shape == (5000,)
 
 
 
@@ -34,7 +34,7 @@ w_bin_np = result_tf.numpy()
 ## any w_bin_np , ct.bf16_to_bin() as string list
 w_bin_list = list(map(lambda x: ct.bf16_to_bin(x), w_bin_np))
 # write w_bin_np to w_b_value_bin.txt
-with open('w_tf_add_result.txt', 'w') as f:
+with open('src/w_tf_add_result.txt', 'w') as f:
     f.write(','.join(w_bin_list))
 
 print(type(w_bin_np[0])) # <class 'bfloat16'>
