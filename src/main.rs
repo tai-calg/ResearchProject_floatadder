@@ -69,6 +69,7 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
     let in_exp2 = (input2 & exp_mask) >> 7; 
     
     let fract_mask = 0b0000_0000_0111_1111; // [6:0]
+    
     let in_fract1 = input1 & fract_mask;
     let in_fract2 = input2 & fract_mask;
 
@@ -80,8 +81,9 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
     let mut exp_b = 0;
     let mut fract_b = 0;
 
-
-    if in_exp1 > in_exp2 {
+    let input1_expfr = input1 & 0b0111_1111_1111_1111 ;
+    let input2_expfr = input2 & 0b0111_1111_1111_1111 ;
+    if input1_expfr > input2_expfr {
         sign_b = in_sign1;
         exp_b = in_exp1;
         fract_b = in_fract1;
@@ -90,32 +92,14 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
         exp_a = in_exp2;
         fract_a = in_fract2;
 
-    }else if in_exp1 == in_exp2 {
-        if in_fract1 > in_fract2 {
-            sign_b = in_sign1;
-            exp_b = in_exp1;
-            fract_b = in_fract1;
-
-            sign_a = in_sign2;
-            exp_a = in_exp2;
-            fract_a = in_fract2;
-        }else{
-            sign_a = in_sign1;
-            exp_a = in_exp1;
-            fract_a = in_fract1;
-
-            sign_b = in_sign2;
-            exp_b = in_exp2;
-            fract_b = in_fract2;
-        }
-    }else{
-        sign_a = in_sign1;
-        exp_a = in_exp1;
-        fract_a = in_fract1;
-
+    }else {
         sign_b = in_sign2;
         exp_b = in_exp2;
         fract_b = in_fract2;
+        
+        sign_a = in_sign1;
+        exp_a = in_exp1;
+        fract_a = in_fract1;
     }
         // MUST b > a
 
@@ -177,7 +161,7 @@ let mut fract_rou = fract & 0b0000_0000_0111_1111; // 7bit
 let sign_result = sign_b;
 
 let fr_all1:bool = fract_rou == 0b0000_0000_0111_1111;
-let ulp:bool = (fract_rou & 0b0000_0000_0000_0001) == 0b0000_0000_0000_0001;
+let ulp:bool = (fract_rou & 0b0000_0000_0000_0001) == 0b1;
 
 // ### //
 

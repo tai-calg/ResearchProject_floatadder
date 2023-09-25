@@ -17,15 +17,22 @@ tf_path = os.path.join(script_dir, 'w_tf_add_result.txt')
 with open(tf_path, 'r') as file:
     tf_bin_strs = file.read().strip().split(',')
 
+w_value_bin_path = os.path.join(script_dir, 'w_value_bin.txt')
+with open(w_value_bin_path,"r") as file:
+    w_value_bin_strs = file.read().strip().split(',')
+
 
 # compare #
 count = 0
 for i in range(len(self_bin_strs)):
     if self_bin_strs[i] != tf_bin_strs[i]:
         count += 1
-        print("not corrected !!",i, \
+        print("------------\n not corrected !!",i, \
               "\n self is ", self_bin_strs[i][:1] , "_",self_bin_strs[i][1:9] , "_" , self_bin_strs[i][9:]  \
-              ,"\n tf is   ", tf_bin_strs[i][:1] , "_",tf_bin_strs[i][1:9] , "_" , tf_bin_strs[i][9:])
+              ,"\n tf is   ", tf_bin_strs[i][:1] , "_",tf_bin_strs[i][1:9] , "_" , tf_bin_strs[i][9:] \
+              , "\n  whose inputs are \n", w_value_bin_strs[2*i][:1], "_" , w_value_bin_strs[2*i][1:9] , "_" , w_value_bin_strs[2*i][9:] \
+              , "and\n", w_value_bin_strs[2*i+1][:1] , "_" ,w_value_bin_strs[2*i+1][1:9] , "_" , w_value_bin_strs[2*i+1][9:]  \
+              ,"\n----------\n"   )
         continue
     else:
         continue

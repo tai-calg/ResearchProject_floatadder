@@ -4,13 +4,13 @@
 
 def bin_to_bf16(binary_string):
     # 符号ビットを取得
-    sgn = int(binary_string[0])
+    sgn :int = int(binary_string[0])
 
     # 指数部を取得し、10進数に変換
-    exp = int(binary_string[1:9], 2)
+    exp :int = int(binary_string[1:9], 2)
 
     # 仮数部を取得し、10進数に変換
-    fract = int(binary_string[9:], 2)
+    fract:int = int(binary_string[9:], 2)
     # print("fract",fract)
 
     # bfloat16から浮動小数点数に変換
@@ -20,14 +20,14 @@ def bin_to_bf16(binary_string):
         return 0.0
 
     # 符号部の計算
-    sign = -1 if sgn else 1
+    sign:float = -1 if sgn else 1
 
     # 仮数部の計算
-    fraction = (1 + fract / 128.0) #正しい
+    fraction:float = (1 + (fract / 128.0) ) #正しい
     # print("fraction", fraction)
 
     # 指数部の計算
-    exponent = exp - 126
+    exponent:float = exp - 127 #changed from 126
 
     # 浮動小数点数に変換
     float_value = sign * (fraction) * (2 ** exponent)
@@ -77,7 +77,7 @@ def bf16_to_bin(bfloat_val): #float -> str
             fract_bin += '0'
 
     # 指数部を2進数に変換
-    exp_val += 126
+    exp_val += 127 # changed from 126
     exp_bin = format(exp_val, '08b')  # 8ビットの2進数に変換
 
     return sgn + exp_bin + fract_bin
