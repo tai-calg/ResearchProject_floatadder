@@ -112,12 +112,12 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
     let overflowed_bits:u32 = fract_a & overflow_mask;
     let mut guard_bit : bool = false;
     if shift_val >= 1 {
-        guard_bit = (overflowed_bits >> (shift_val-1) ) & 0b0001 == 1;
+        guard_bit = (overflowed_bits >> (shift_val-1) ) & 0b1 == 1;
     }
     let mut round_bit : bool = false;
     let mut sticky_mask:u32 = 0;
     if shift_val >= 2 {
-        round_bit = (overflowed_bits >> (shift_val-2) ) & 0b0001 == 1;
+        round_bit = (overflowed_bits >> (shift_val-2) ) & 0b01 == 1;
         sticky_mask = (1 << (shift_val-2)) - 1;
     }
     let sticky_bit : bool = (overflowed_bits & sticky_mask) != 0b0000_00;
@@ -127,14 +127,10 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
 
     // procedual 5←変更 : round
 
-    let mut fract_rou = fract_a & 0b0000_0000_0111_1111; // 7bit
-    // sgn_a and sgn_b 
-
-    let fr_all1:bool = fract_rou == 0b0000_0000_0111_1111;
-    let ulp:bool = (fract_rou & 0b0000_0000_0000_0001) == 0b1;
+    let ulp:bool = (fract_a & 0b0000_0000_0000_0001) == 0b1;
 
 
-    if exp_ep <= 8 {
+    if exp_ep <= 8 { //9bit以上シフトすると,絶対にRoundによる切り上げが発生しない(G=0ゆえ)
         if guard_bit & (sticky_bit | round_bit | ulp) {
             shifted_fract_a += 1;
         }
