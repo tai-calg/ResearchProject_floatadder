@@ -56,7 +56,6 @@ fn main() {
     // assert_eq!(output, res_u32 >> 16);
 }
 
-
 fn float_adder_run(input1:u32, input2:u32)-> u32 {
 
 // procedual 1 : swap 
@@ -105,6 +104,7 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
 
 // procedual 2 : shift
     let shift_val = cmp::min(exp_b - exp_a,8);
+    let exp_ep = exp_b - exp_a;
     fract_a |= 0b0000_0000_1000_0000; //hidden bitを結合
     fract_b |= 0b0000_0000_1000_0000; //hidden bitを結合
 
@@ -121,11 +121,36 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
         sticky_mask = (1 << (shift_val-2)) - 1;
     }
     let sticky_bit : bool = (overflowed_bits & sticky_mask) != 0b0000_00;
-    let shifted_fract_a = fract_a >> shift_val;
+    // !!! //
+    //@ GRS roundはshifted_fract_aに対して行う！
+    let mut shifted_fract_a = fract_a >> shift_val;
+
+    // procedual 5←変更 : round
+
+    let mut fract_rou = fract_a & 0b0000_0000_0111_1111; // 7bit
+    // sgn_a and sgn_b 
+
+    let fr_all1:bool = fract_rou == 0b0000_0000_0111_1111;
+    let ulp:bool = (fract_rou & 0b0000_0000_0000_0001) == 0b1;
+
+
+    if exp_ep <= 8 {
+        if guard_bit & (sticky_bit | round_bit | ulp) {
+            shifted_fract_a += 1;
+        }
+    }
 
 // procedual 3 : add , sub 
-    let add_result = fract_b + shifted_fract_a; // 桁上がりの含めて9bit
+    let add_result = fract_b + shifted_fract_a; // In:8bit, Out:桁上がりの含めて9bit
     let sub_result = fract_b - shifted_fract_a; // 桁上がりの含めて9bit
+    
+    // if shifted_fract_a != 0 { //[test]
+    //     println!("add_result: {:0>16b}", add_result);
+    //     println!("sub_result: {:0>16b}", sub_result);
+    //     println!("fract_b   : {:0>16b}", fract_b);
+    //     println!("----------");
+    // }
+
     // println!("add_result: {}", add_result);
     // println!("sub_result: {:0>16b}", sub_result);
         
@@ -140,6 +165,7 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
      */
     let mut exp = exp_b;
     let mut fract = calc_result; //9bit
+
     if selector { // add
         if (fract & 0b0000_0001_0000_0000) != 0 { // 9bit目が1の時(桁あがり)
             exp += 1;
@@ -154,24 +180,7 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
         }
     }
 
-// procedual 5 : round
-let mut exp_rou: u32 = exp ;
-let mut fract_rou = fract & 0b0000_0000_0111_1111; // 7bit
-// sgn_a and sgn_b 
-let sign_result = sign_b;
 
-let fr_all1:bool = fract_rou == 0b0000_0000_0111_1111;
-let ulp:bool = (fract_rou & 0b0000_0000_0000_0001) == 0b1;
-
-// ### //
-
-// if guard_bit & (sticky_bit | round_bit | ulp) {
-//     fract_rou += 1;
-//     if fr_all1 {
-//         exp_rou += 1;
-//         fract_rou = 0;
-//     }
-// }
 
 // ### //
 
@@ -190,14 +199,14 @@ val    s_exponent_signcnd
 0    = 1 00000000 0000000 = −0
 
 */
-let exp_result: u32 = exp_rou ;
-let fract_result = fract_rou & 0b0000_0000_0111_1111; // 7bit
+let exp_result: u32 = exp ;
+let fract_result = fract & 0b0000_0000_0111_1111; // 7bit
 let sign_result = sign_b;
 
 if exp_result == 0b11111111 {
         if fract_result == 0 {
             // +inf or -inf
-            return (sign_result as u32) << 15 | 0b11111111_0000000;
+            return (sign_result as u32) << 15 | 0b0_11111111_0000000;
         }else{
             // NaN
             // tf ではNanは fract is {all 1}である。
