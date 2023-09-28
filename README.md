@@ -15,7 +15,7 @@ tensorflow version == 2.13.0
 
 ```
 gen_random_bin.py  ==>     bfloat.py     ==>    main.rs     ==>  compare_txt.py 
-    ↓                           ↓               　　Lーーーーーーーー|
+    ↓                           ↓               　　Lーーーーーーーーーー|
 w_value_bin.txt(約10000個) -> w_tf_add_result.txt(約5000個)        ↓
     L--------------------------->      w_self_add_result.txt(約5000個) 
 ```
