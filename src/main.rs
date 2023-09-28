@@ -24,7 +24,7 @@ fn main() {
     //// for i ,i+1 ; 0 ~ bin_values.len() - 1 ; i+=2; bin_values[i] , bin_values[i+1]
     let mut output_list = Vec::new();
     for i in (0..bin_values.len()).step_by(2) {
-        // println!("### float adder ###"); //res: 0.015625 * 2^(0) = 0.015625 //下駄によりexpは-126 する。
+        // println!("### float adder ###");  //下駄によりexpは-127 する。
         // println!("input1: {:0>16b}", bin_values[i]);
         // println!("input2: {:0>16b}", bin_values[i+1]);
         let output = float_adder_run(bin_values[i], bin_values[i+1]);
@@ -56,9 +56,9 @@ fn main() {
     // assert_eq!(output, res_u32 >> 16);
 }
 
-fn float_adder_run(input1:u32, input2:u32)-> u32 {
+fn float_adder_run(input1:u32, input2:u32)->u32 {
 
-// procedual 1 : swap 
+// === procedual 1 : swap ===
     let sign_mask = 0b1000_0000_0000_0000; // [15]
     let in_sign1:bool = (input1 & sign_mask) != 0;
     let in_sign2:bool = (input2 & sign_mask) != 0;
@@ -72,14 +72,15 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
     let in_fract1 = input1 & fract_mask;
     let in_fract2 = input2 & fract_mask;
 
-    let mut sign_a = false; // false: +, true: -
-    let mut exp_a = 0;
-    let mut fract_a = 0;
+    let sign_a; // false: +, true: -
+    let exp_a;
+    let mut fract_a;
 
-    let mut sign_b = false;
-    let mut exp_b = 0;
-    let mut fract_b = 0;
+    let sign_b;
+    let exp_b;
+    let mut fract_b;
 
+    // MUST b > a
     let input1_expfr = input1 & 0b0111_1111_1111_1111 ;
     let input2_expfr = input2 & 0b0111_1111_1111_1111 ;
     if input1_expfr > input2_expfr {
@@ -100,88 +101,95 @@ fn float_adder_run(input1:u32, input2:u32)-> u32 {
         exp_a = in_exp1;
         fract_a = in_fract1;
     }
-        // MUST b > a
 
-// procedual 2 : shift
-    let shift_val = cmp::min(exp_b - exp_a,8);
-    let exp_ep = exp_b - exp_a;
+    
+    
+    // === procedual 2 : shift ===
     fract_a |= 0b0000_0000_1000_0000; //hidden bitを結合
     fract_b |= 0b0000_0000_1000_0000; //hidden bitを結合
-
-    let overflow_mask:u32 = (1 << shift_val) - 1;
-    let overflowed_bits:u32 = fract_a & overflow_mask;
-    let mut guard_bit : bool = false;
-    if shift_val >= 1 {
-        guard_bit = (overflowed_bits >> (shift_val-1) ) & 0b1 == 1;
-    }
-    let mut round_bit : bool = false;
-    let mut sticky_mask:u32 = 0;
-    if shift_val >= 2 {
-        round_bit = (overflowed_bits >> (shift_val-2) ) & 0b01 == 1;
-        sticky_mask = (1 << (shift_val-2)) - 1;
-    }
-    let sticky_bit : bool = (overflowed_bits & sticky_mask) != 0b0000_00;
-    // !!! //
-    //@ GRS roundはshifted_fract_aに対して行う！
-    let mut shifted_fract_a = fract_a >> shift_val;
-
-    // procedual 5←変更 : round
-
-    let ulp:bool = (fract_a & 0b0000_0000_0000_0001) == 0b1;
-
-
-    if exp_ep <= 8 { //9bit以上シフトすると,絶対にRoundによる切り上げが発生しない(G=0ゆえ)
-        if guard_bit & (sticky_bit | round_bit | ulp) {
-            shifted_fract_a += 1;
-        }
-    }
-
-// procedual 3 : add , sub 
-    let add_result = fract_b + shifted_fract_a; // In:8bit, Out:桁上がりの含めて9bit
-    let sub_result = fract_b - shifted_fract_a; // 桁上がりの含めて9bit
     
-    // if shifted_fract_a != 0 { //[test]
-    //     println!("add_result: {:0>16b}", add_result);
-    //     println!("sub_result: {:0>16b}", sub_result);
-    //     println!("fract_b   : {:0>16b}", fract_b);
-    //     println!("----------");
-    // }
+    //ゼロ例外のときvalue＝0にする．(inf例外は後で対応してる)（非正規数はそもそも入力されない前提）
+    if exp_a == 0b000_0000 {
+        fract_a = 0;
+    }
+    if exp_b == 0b000_0000 {
+        fract_b = 0;
+    }
 
-    // println!("add_result: {}", add_result);
-    // println!("sub_result: {:0>16b}", sub_result);
+
+    let shift_val = cmp::min(exp_b - exp_a,10);  
+    let shifted_fract_b = fract_b << shift_val; // add/sub はInput:16bit
+
+
+
+// === procedual 3 : add , sub ===
+    let add_result = shifted_fract_b + fract_a; // In,Out:16bit
+    let sub_result = shifted_fract_b - fract_a; 
+
         
-    //xnor sign for mux selector
     let selector = !(sign_a ^ sign_b);
-    let calc_result = if selector {add_result} else {sub_result};
+    let mut calc_result = if selector {add_result} else {sub_result};
 
-// procedual 4 : normalize
+// === procedual 4 : normalize ===
     /*
     Addを選択した時…  if (    fr[8](...最上位ビットである9番目) == 1    ){exp++; fr >>1;}else{} fractはinput[6:0]を出力
     Subを選択した時…  while (   fr[7](...切り捨てる予定の整数部) == 0    ) { exp--; fr << 1;} while後にinput[6:0]を出力
      */
     let mut exp = exp_b;
-    let mut fract = calc_result; //9bit
+
+    let floor_mask:u32 = 1 << (shift_val+8-1); // when shift_val = 4 : 0b0000_1000_0000_0000
+    let fract_mask:u32 = floor_mask - (1 << shift_val); // when shift_val = 4 : 0b0000_0111_1111_0000
+    let grs_mask:u32 = (1 << shift_val) - 1; // when shift_val = 4 : 0b0000_0000_0000_1111
+    let mut guard = false;
+    let mut round = false;
 
     if selector { // add
-        if (fract & 0b0000_0001_0000_0000) != 0 { // 9bit目が1の時(桁あがり)
+        if (calc_result & floor_mask<<1) != 0 { // 下から8+n bit目が1の時(桁あがり) , nはshift_val
             exp += 1;
-            fract = fract >> 1;
-        }else{
-            // do nothing
+            if shift_val == 0{
+                guard =   (calc_result & 0b1) == 0b1  ;
+            }
+            if shift_val == 1 {
+                round =   (calc_result & 0b1) == 0b1  ;
+            }
+            calc_result = calc_result >> 1; //怪しい．この>>1がGになる時があるのでは？→そのとおり．shiftval==0,1の時にはGかRの情報が失われる．故に上のコードを追加して対処．
         }
     }else { // sub
-        while(fract & 0b0000_0000_1000_0000) == 0 { // 8bit目が0の時(切り捨てる予定の整数部)
-            exp -= 1; // max -7
-            fract = fract << 1;
+        while (calc_result & floor_mask) == 0 { 
+            exp -= 1; 
+            calc_result = calc_result << 1;
+        }
+    }
+    let mut fract = (calc_result & fract_mask) >> shift_val;
+    
+    
+    
+    // === procedual 5  : round ===
+    let ulp =  ( fract & 0b1 )==1  ;
+
+    let mut sticky_mask =0;
+    if shift_val >= 1 {
+        guard = ( ( (calc_result & grs_mask) >> (shift_val-1) ) & 0b1 ) == 1; 
+    }
+    if shift_val >= 2 {
+        round = ( ( (calc_result & grs_mask) >> (shift_val-2) ) & 0b1 ) == 1;
+        sticky_mask  = (1 << (shift_val-2)) - 1;
+    }
+    let sticky = (calc_result & sticky_mask) >=1 ;
+    let fr_all1 = fract == 0b0111_1111;
+
+
+    if guard & (sticky | round | ulp) {
+        if fr_all1 {
+            fract = 0;
+            exp += 1;
+        }else{
+            fract += 1;
         }
     }
 
 
-
-// ### //
-
-
-// procedual 6 : 例外処理
+// === procedual 6 : 例外処理 ===
 /*
 val    s_exponent_signcnd
 +inf = 0_11111111_0000000
@@ -196,32 +204,31 @@ val    s_exponent_signcnd
 
 */
 let exp_result: u32 = exp ;
-let fract_result = fract & 0b0000_0000_0111_1111; // 7bit
+let fract_result = fract & 0b0000_0000_0111_1111; 
 let sign_result = sign_b;
 
+//inf例外を考慮
 if exp_result == 0b11111111 {
         if fract_result == 0 {
             // +inf or -inf
             return (sign_result as u32) << 15 | 0b0_11111111_0000000;
         }else{
             // NaN
-            // tf ではNanは fract is {all 1}である。
+            // tf ではNanは fract is {all 1}となる仕様である。
             return 0b011111111_1111111;
         }
     }
 
-// procedual 7 : binding bits process 
-
-
+// === procedual 7 : binding bits process  ===
 
     //bind sgn | exp | fract
     let result = (sign_result as u32) << 15 | (exp_result << 7) | fract_result;
-
 
     return result; 
 
 }
 
+/* 
 fn u32_to_bool_array(n: u32) -> [bool; 32] {
     let mut array = [false; 32];
     for i in 0..32 {
@@ -245,3 +252,4 @@ fn ieee_to_f32(ieee: u32) -> f32 {
 fn f32_to_ieee(f32: f32) -> u32 {
     f32.to_bits()
 }
+*/
