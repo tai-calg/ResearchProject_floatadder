@@ -24,7 +24,7 @@ w_value_bin.txt(約10000個) -> w_tf_add_result.txt(約5000個)        ↓
 
 ### コードの読み方
 
-rustではbit演算を　AND(&)と shiftを行うことで処理してます．
+Rustではbit演算を　AND(&)と shiftを行うことで処理してます．
 
 つまりVerilogでvalue[12:3]のように切り取る操作は，Rustでは”ANDマスクによって切り取りたいBitを切り取ったのちにShift(>>)でスライドさせる”ことで実現しています．
 
