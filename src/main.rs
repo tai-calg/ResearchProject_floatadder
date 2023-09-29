@@ -18,7 +18,6 @@ fn main() {
     .collect();
     assert_eq!(0b0000_0000_0111_1111 , u32::from_str_radix("0000000001111111", 2).unwrap());
 
-    // println!("### float adder ###"); //res: 0.015625 * 2^(0) = 0.015625 //下駄によりexpは-126 する。
 
 
     //// for i ,i+1 ; 0 ~ bin_values.len() - 1 ; i+=2; bin_values[i] , bin_values[i+1]
@@ -128,7 +127,7 @@ fn float_adder_run(input1:u32, input2:u32)->u32 {
 
         
     let selector = !(sign_a ^ sign_b);
-    let mut calc_result = if selector {add_result} else {sub_result};
+    let mut calc_result = if selector {add_result} else {sub_result}; //width:19bit
 
 // === procedual 4 : normalize ===
     /*
@@ -144,9 +143,9 @@ fn float_adder_run(input1:u32, input2:u32)->u32 {
     let mut round = false;
 
     if selector { // add
-        if (calc_result & floor_mask<<1) != 0 { // 下から8+n bit目が1の時(桁あがり) , nはshift_val
+        if (calc_result & floor_mask<<1) != 0 { // 下から8+n+1 bit目が1の時(桁あがりしてる時) , nはshift_val.
             exp += 1;
-            if shift_val == 0{
+            if shift_val == 0 {
                 guard =   (calc_result & 0b1) == 0b1  ;
             }
             if shift_val == 1 {
@@ -156,7 +155,7 @@ fn float_adder_run(input1:u32, input2:u32)->u32 {
         }
     }else { // sub
         while (calc_result & floor_mask) == 0 { 
-            exp -= 1; 
+            exp -= 1;
             calc_result = calc_result << 1;
         }
     }
