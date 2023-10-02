@@ -1,12 +1,16 @@
 use std::cmp;
 use std::fs;
 
+use crate::adder_without_round::adder_without_round_run;
+mod adder_without_round;
+
 /*
     let input1:u32 = 0b1100_0000_1000_0101; // bfloat16 
     let input2:u32 = 0b0000_0110_1000_0011; // bfloat16
     の16bitをランダム生成にして、10000回ほどループで回して,それをassert_eq!で比較する.
 */
 fn main() {
+    
     // let input1:u32 = 0b1_01111110_0000101; // bfloat16 
     // let input2:u32 = 0b0_01111110_0000011; // bfloat16 
     let contents = fs::read_to_string("src/w_value_bin.txt")
@@ -23,10 +27,9 @@ fn main() {
     //// for i ,i+1 ; 0 ~ bin_values.len() - 1 ; i+=2; bin_values[i] , bin_values[i+1]
     let mut output_list = Vec::new();
     for i in (0..bin_values.len()).step_by(2) {
-        // println!("### float adder ###");  //下駄によりexpは-127 する。
-        // println!("input1: {:0>16b}", bin_values[i]);
-        // println!("input2: {:0>16b}", bin_values[i+1]);
-        let output = float_adder_run(bin_values[i], bin_values[i+1]);
+
+        let output = adder_without_round::adder_without_round_run(bin_values[i], bin_values[i+1]);
+        // let output = float_adder_run(bin_values[i], bin_values[i+1]);
         output_list.push(output);
 
     }
@@ -116,7 +119,7 @@ fn float_adder_run(input1:u32, input2:u32)->u32 {
     }
 
 
-    let shift_val = cmp::min(exp_b - exp_a,10);  
+    let mut shift_val = cmp::min(exp_b - exp_a,10);  
     let shifted_fract_b = fract_b << shift_val; // add/sub はInput:16bit
 
 
@@ -136,26 +139,37 @@ fn float_adder_run(input1:u32, input2:u32)->u32 {
      */
     let mut exp = exp_b;
 
-    let floor_mask:u32 = 1 << (shift_val+8-1); // when shift_val = 4 : 0b0000_1000_0000_0000
-    let fract_mask:u32 = floor_mask - (1 << shift_val); // when shift_val = 4 : 0b0000_0111_1111_0000
-    let grs_mask:u32 = (1 << shift_val) - 1; // when shift_val = 4 : 0b0000_0000_0000_1111
+    let mut floor_mask:u32 = 1 << (shift_val+8-1); // when shift_val = 4 : 0b0000_1000_0000_0000
+    let mut fract_mask:u32 = floor_mask - (1 << shift_val); // when shift_val = 4 : 0b0000_0111_1111_0000
+    let mut grs_mask:u32 = (1 << shift_val) - 1; // when shift_val = 4 : 0b0000_0000_0000_1111
     let mut guard = false;
     let mut round = false;
 
     if selector { // add
         if (calc_result & floor_mask<<1) != 0 { // 下から8+n+1 bit目が1の時(桁あがりしてる時) , nはshift_val.
             exp += 1;
-            if shift_val == 0 {
-                guard =   (calc_result & 0b1) == 0b1  ;
-            }
-            if shift_val == 1 {
-                round =   (calc_result & 0b1) == 0b1  ;
-            }
-            calc_result = calc_result >> 1; //怪しい．この>>1がGになる時があるのでは？→そのとおり．shiftval==0,1の時にはGかRの情報が失われる．故に上のコードを追加して対処．
+            // if shift_val == 0 {
+            //     guard =   (calc_result & 0b1) == 0b1  ;
+            // }
+            // if shift_val == 1 {
+            //     round =   (calc_result & 0b1) == 0b1  ;
+            // }
+            // calc_result = calc_result >> 1; //怪しい．この>>1がGになる時があるのでは？→そのとおり．shiftval==0,1の時にはGかRの情報が失われる．故に上のコードを追加して対処．
+
+            // ### >>1するのではなく，マスクを左に1ずらす！ ###
+            floor_mask = floor_mask << 1;
+            fract_mask = fract_mask << 1;
+            grs_mask = (grs_mask << 1) +1;
+            shift_val += 1;
+
         }
     }else { // sub
+        if calc_result == 0 { // input -a,bが完全に一致時発生． 
+            return 0b0_00000000_0000000;
+        }
         while (calc_result & floor_mask) == 0 { 
             exp -= 1;
+            if exp == 0 { return 0b0_00000000_0000000;} //exp<7で発生する可能性あり．
             calc_result = calc_result << 1;
         }
     }
@@ -208,15 +222,9 @@ let sign_result = sign_b;
 
 //inf例外を考慮
 if exp_result == 0b11111111 {
-        if fract_result == 0 {
-            // +inf or -inf
-            return (sign_result as u32) << 15 | 0b0_11111111_0000000;
-        }else{
-            // NaN
-            // tf ではNanは fract is {all 1}となる仕様である。
-            return 0b011111111_1111111;
-        }
-    }
+    // +inf or -inf
+    return (sign_result as u32) << 15 | 0b0_11111111_0000000;
+}
 
 // === procedual 7 : binding bits process  ===
 

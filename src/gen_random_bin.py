@@ -23,8 +23,12 @@ def check_condition(binary_str):
     """
     return binary_str[1:9] != '11111111'
 
-# 10,000個のランダムなバイナリ列を生成し、条件に合致するものだけを保存
-binary_values = [generate_random_binary() for _ in range(10000)]
+# 10,0000個のランダムなバイナリ列を生成し、条件に合致するものだけを保存
+binary_values = [generate_random_binary() for _ in range(100000)]
+# if binary_values.count % 2 == 1: # 奇数の場合は最後の要素を削除
+if len(binary_values) % 2 == 1:
+    binary_values.pop()
+    
 filtered_values = filter(check_condition, binary_values)
 
 # これらのバイナリ列を','で区切ってテキストファイルに書き込み
