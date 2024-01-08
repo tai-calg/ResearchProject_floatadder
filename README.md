@@ -7,18 +7,16 @@ tensorflow version == 2.13.0
 
 ## 行ったこと
 
-1. w_value_bin.txt にランダムな16bit列を10000個書く。(gen_random_bin.pyで生成)
-2. そのbit列をtensorflowでのbfloat16型に変換して、その型で加算。結果をまたbit列に直してから、w_tf_add_result.txtに書く。
-3. w_value_bin.txt のbit列を次は自分の組んだモジュール(論理回路の処理を仮想的に表現したもの)で加算。
-4. 3.の結果はそのままbit列なので、それをw_self_add_result.txtに書く。
-5. 最後に2.,4.で作ったtxtが全て正しいか比較する。
+1. gen_random_bin.pyによってw_value_bin.txt にランダムな16bit列を約10000個書く。
+2. bfloat.pyによって，その約10000個の16bitをtensorflowでのbfloat16型の実数値に変換して，加算。結果をもう一度16bitに直してから、w_tf_add_result.txtに書く。
+3. main.rsによってw_value_bin.txt の16bitを次は自分の組んだモジュール(論理回路の処理を仮想的に表現したもの)で加算。
+4. "3."の結果はそのまま16bitなので、それをw_self_add_result.txtに書く。
+5. 最後に"2.","4."で作ったtxt(加算結果の約5000個の16bit)が全て正しいか比較する。
 
-```
-gen_random_bin.py  ==>     bfloat.py     ==>    main.rs     ==>  compare_txt.py 
-    ↓                           ↓               　　Lーーーーーーーーーー|
-w_value_bin.txt(約10000個) -> w_tf_add_result.txt(約5000個)        ↓
-    L--------------------------->      w_self_add_result.txt(約5000個) 
-```
+
+![float-adder-github drawio (1)](https://github.com/tai-calg/ResearchProject_floatadder/assets/62682789/3eae20c3-de9e-4929-9a7d-af6b243c23ac)
+
+
 
 ## 注意点
 
