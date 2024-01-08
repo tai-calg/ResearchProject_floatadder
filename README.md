@@ -9,9 +9,8 @@ tensorflow version == 2.13.0
 
 1. gen_random_bin.pyによって，w_value_bin.txt にランダムな16bit列を約10000個書く。
 2. bfloat.pyによって，その約10000個の16bitをtensorflowでのbfloat16型の実数値に変換して，加算。結果をもう一度16bitに直してから、w_tf_add_result.txtに書く。
-3. main.rsによって，w_value_bin.txt の16bitを次は自分の組んだモジュール(論理回路の処理を仮想的に表現したもの)で加算。
-4. "3."の結果はそのまま16bitなので、それをw_self_add_result.txtに書く。
-5. 最後に"2.","4."で作ったtxt(加算結果の約5000個の16bit)が全て正しいか比較する。
+3. main.rsによって，w_value_bin.txt の約10000個の16bitを次は自分の組んだモジュール(論理回路の処理を仮想的に表現したもの)で加算。結果はそのまま16bitなので、それをw_self_add_result.txtに書く。
+4. 最後にcompare.pyによって，"2.","3."で作ったtxt(加算結果の約5000個の16bit)が全て正しいか比較する。
 
 
 ![float-adder-github drawio (1)](https://github.com/tai-calg/ResearchProject_floatadder/assets/62682789/3eae20c3-de9e-4929-9a7d-af6b243c23ac)
