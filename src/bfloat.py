@@ -40,6 +40,7 @@ with open('src/w_tf_add_result.txt', 'w') as f:
     f.write(','.join(w_bin_list))
 
 print(type(w_bin_np[0])) # <class 'bfloat16'>
+print("処理に成功しました")
 
 ###
 """

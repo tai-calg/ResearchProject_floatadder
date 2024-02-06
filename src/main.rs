@@ -1,8 +1,12 @@
 use std::cmp;
 use std::fs;
 
-use crate::adder_without_round::adder_without_round_run;
 mod adder_without_round;
+use crate::adder_without_round::adder_without_round_run;
+
+mod adder_with_cmpl; // fileをimport
+use crate::adder_with_cmpl::adder_with_cmpl_run; //関数をimport
+
 
 /*
     let input1:u32 = 0b1100_0000_1000_0101; // bfloat16 
@@ -29,7 +33,8 @@ fn main() {
     for i in (0..bin_values.len()).step_by(2) {
 
         // let output = adder_without_round::adder_without_round_run(bin_values[i], bin_values[i+1]);
-        let output = float_adder_run(bin_values[i], bin_values[i+1]);
+        // let output = float_adder_run(bin_values[i], bin_values[i+1]);
+        let output = adder_with_cmpl_run(bin_values[i], bin_values[i+1]);
         output_list.push(output);
 
     }
