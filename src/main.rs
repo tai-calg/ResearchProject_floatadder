@@ -28,8 +28,8 @@ fn main() {
     let mut output_list = Vec::new();
     for i in (0..bin_values.len()).step_by(2) {
 
-        let output = adder_without_round::adder_without_round_run(bin_values[i], bin_values[i+1]);
-        // let output = float_adder_run(bin_values[i], bin_values[i+1]);
+        // let output = adder_without_round::adder_without_round_run(bin_values[i], bin_values[i+1]);
+        let output = float_adder_run(bin_values[i], bin_values[i+1]);
         output_list.push(output);
 
     }
@@ -164,7 +164,7 @@ fn float_adder_run(input1:u32, input2:u32)->u32 {
 
         }
     }else { // sub
-        if calc_result == 0 { // input -a,bが完全に一致時発生． 
+        if calc_result == 0 { // input -a,bが完全一致時，発生． 
             return 0b0_00000000_0000000;
         }
         while (calc_result & floor_mask) == 0 { 
