@@ -249,7 +249,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn prefix-adder-run() {
+    fn prefix_adder_run() {
         let input1:u32 = 0b1100_0000_1000_0101; // bfloat16 
         let input2:u32 = 0b0000_0110_1000_0011; // bfloat16 
         let output = float_adder_run(input1, input2);
