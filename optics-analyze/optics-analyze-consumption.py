@@ -32,32 +32,21 @@ p_dac1 = 153.0
 p_adc11 = 1059.0
 p_dac10 = 350.1
 p_psi = 1.7
+p_lg = 5*1/2516 *1000.0 #fJ/once
 
-late_mzi = 4.758e-13
-late_dc = 2.334e-13
-late_ps = 9.043e-15
-late_mrr = 3.664e-13
-late_pd = 4.0e-11
-late_adc1 = 1.0e-11
-late_dac1 = 1.0e-11
-late_adc11 = 0.33e-9
-late_dac10 = 0.125e-9
-late_awg = 1.867e-10
-late_psi = 3.5e-14
 
-late_bf16a = 2.97*12/78
 
 p_WMAU:float = p_dac10 *2 + p_mrr*2 + p_adc11 
-p_OPNA:float = p_adc1 *10 +p_mrr*10 + p_dc*10 + p_psi*34
+p_OPNA:float = p_adc1 *10 +p_mrr*10 + p_dc*17 +p_pd*10+ p_psi*34 + p_lg*30
 
 import numpy as np
 
-# p_WMAUとp_OPNAの内訳
+# p_WMAとp_OPAの内訳
 components_WMAU = ['DAC_10', 'MRR', 'ADC_11']
 power_WMAU = [p_dac10 * 2, p_mrr * 2, p_adc11]
 
-components_OPNA = [ 'MRR', 'DC', 'PSI','ADC_1']
-power_OPNA = [ p_mrr * 10, p_dc * 10, p_psi * 34, p_adc1 * 10]
+components_OPNA = [ 'MRR', 'DC','PD', 'PSI_AND','ADC_1', 'LogicGate']
+power_OPNA = [ p_mrr * 10, p_dc * 17,p_pd*10, p_psi * 34, p_adc1 * 10, p_lg*30 ]
 
 # 帯グラフの描画
 fig, ax = plt.subplots()
@@ -78,25 +67,25 @@ ax.broken_barh([(0, p_e10ad_fJperFPAO)], (30, 9), facecolors='#ffaa00', label='1
 # p_WMAUの描画
 ax.broken_barh([(0, power_WMAU[0])], (20, 9), facecolors='#0083ff', label=components_WMAU[0])
 ax.broken_barh([(power_WMAU[0], power_WMAU[1])], (20, 9), facecolors='#ffff33')
-ax.broken_barh([(sum(power_WMAU[:2]), power_WMAU[2])], (20, 9), facecolors='#ff2060', label=components_WMAU[2])
+ax.broken_barh([(sum(power_WMAU[:2]), power_WMAU[2])], (20, 9), facecolors='#ff7070', label=components_WMAU[2])
 
 # p_epalu の描画
 p_epalu = 1.0445 * 1000.0 #fJ/FPAO
-ax.broken_barh([(0, p_epalu)], (10, 9), facecolors='#33bb54', label='EPALU')
+ax.broken_barh([(0, p_epalu)], (0, 9), facecolors='#33bb54', label='EPALU')
 
 # p_OPNAの描画
 start = 0
-colors = ['#ffff33', 'y', 'm','#ff0000']
+colors = ['#ffff33', 'y','#000000', 'm','#ff0000','#888888']
 for i, power in enumerate(power_OPNA):
-    ax.broken_barh([(start, power)], (0, 9), facecolors=colors[i], label=components_OPNA[i])
+    ax.broken_barh([(start, power)], (10, 9), facecolors=colors[i], label=components_OPNA[i])
     start += power
-    
+
 # グラフの設定
 ax.set_ylim(0, 40)
-ax.set_xlim(0, max(sum(power_WMAU)+300, sum(power_OPNA)+300, p_e10ad_fJperFPAO+300 ))
-ax.set_xlabel('Power [fJ/once]')
-ax.set_yticks([5, 15,25,35])
-ax.set_yticklabels(['P_OPNA','P_EPALU', 'P_WMAU', 'P_bf16a' ])
+ax.set_xlim(0, max(sum(power_WMAU)+1000, sum(power_OPNA)+1000, p_e10ad_fJperFPAO+1000 ))
+ax.set_xlabel('Energy [fJ/FPAO]')
+ax.set_yticks([5, 15, 25, 35])
+ax.set_yticklabels(['E_EPALU','E_OPA', 'E_WMA', 'E_RTL10A' ])
 ax.grid(False)
 
 
@@ -144,14 +133,16 @@ ax.grid(False)
 # 凡例の追加
 ax.legend()
 
-plt.show()
-# plt.savefig("optics-analyze.png",dpi=300)
+plt.savefig("optics-power.png",dpi=300)
 # plt.savefig("optics-analyze_without_EPALU.png",dpi=300)
+plt.show() # これは最後に書かないとsavefigが真っ白になる．
 
 
 
 print("P_bf16adder is" , p_ebfa_fJperFPAO)
 print("P_10bitadder is" , p_e10ad_fJperFPAO)
+print("P_WMAU is" , p_WMAU)
+print("P_OPNA is" , p_OPNA)
 
 
 """
