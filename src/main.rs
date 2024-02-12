@@ -7,6 +7,10 @@ use crate::adder_without_round::adder_without_round_run;
 mod adder_with_cmpl; // fileをimport
 use crate::adder_with_cmpl::adder_with_cmpl_run; //関数をimport
 
+mod ten_adder_LG;
+use crate::ten_adder_LG::PA; //関数をimport
+mod ten_adder_OPA;
+use crate::ten_adder_OPA::OPA; //関数をimport
 
 /*
     let input1:u32 = 0b1100_0000_1000_0101; // bfloat16 
@@ -240,28 +244,15 @@ if exp_result == 0b11111111 {
 
 }
 
-/* 
-fn u32_to_bool_array(n: u32) -> [bool; 32] {
-    let mut array = [false; 32];
-    for i in 0..32 {
-        array[i] = ((n >> i) & 1) == 1;
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn prefix-adder-run() {
+        let input1:u32 = 0b1100_0000_1000_0101; // bfloat16 
+        let input2:u32 = 0b0000_0110_1000_0011; // bfloat16 
+        let output = float_adder_run(input1, input2);
+        assert_eq!(0b1100_0110_0000_1000, output);
     }
-    array
 }
-
-fn bfloat16_to_ieee(bf16: u16) -> u32 {
-    let sign = (bf16 & 0b1000_0000_0000_0000) as u32;
-    let exp = (bf16 & 0b0111_1111_1000_0000) as u32;
-    let fract = (bf16 & 0b0000_0000_0111_1111) as u32;
-
-    (sign << 16) | (exp << 16) | (fract << 16)
-}
-
-fn ieee_to_f32(ieee: u32) -> f32 {
-    f32::from_bits(ieee)
-}
-
-fn f32_to_ieee(f32: f32) -> u32 {
-    f32.to_bits()
-}
-*/

@@ -1,6 +1,11 @@
 use std::cmp;
 // ビット列を分離(分割)したら，それぞれ別の変数として分けた方が可読性が良い．
 
+    // println!("{}", 1<<4-1); 
+    // println!("{}", 0b01100); //12
+    // println!("{}", !(0b01100)+1);
+    // assert!( (!(0b01100)+1) == (0b01100 * -1) );
+    // println!("succeess");
 
 pub fn adder_with_cmpl_run(input1:u32, input2:u32)->u32 {
 
