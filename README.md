@@ -13,9 +13,28 @@ tensorflow version == 2.13.0
 4. 最後にcompare.pyによって，"2.","3."で作ったtxt(加算結果の約5000個の16bit)が全て正しいか比較する。
 
 
-![float-adder-github drawio (1)](https://github.com/tai-calg/ResearchProject_floatadder/assets/62682789/3eae20c3-de9e-4929-9a7d-af6b243c23ac)
+![float-adder-github drawio](https://github.com/tai-calg/ResearchProject_floatadder/img/float-adder-github.png)
 
+## 使い方
 
+### 全体の流れ
+`
+$ python gen_random_bin.py
+$ python bfloat.py
+$ cargo run  --  --adder Default
+$ python compare.py 
+`
+
+#### 使用する計算方法を選択する
+`cargo run  --  --adder [AdderName]`でBfloat16加算器の内部処理回路の変更ができます．
+選択肢は以下の通りです．
+`cargo run  --  --adder Default` ... 卒業論文，付録部(図7.1)に記載された補数表現を使用しないBfloat16加算器
+
+`cargo run  --  --adder ByCmpl`   ...  卒業論文，第二章に記した補数表現を使用するBfloat16加算器
+
+`cargo run  --  --adder TenAdderLG` ... 10bit Prefix Adder を論理ゲートで処理したBfloat16加算器
+
+`cargo run  --  --adder TenAdderOPA` ... 10bit Prefix Adder を光デバイスのAND,ORゲートで処理したBfloat16加算器(本研究の提案)
 
 ## 注意点
 

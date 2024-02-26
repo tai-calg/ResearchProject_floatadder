@@ -1,5 +1,10 @@
 use std::cmp;
 use std::fs;
+use clap::Parser;
+
+
+mod clap_args;
+use clap_args::AdderType;
 
 mod adder_without_round;
 use crate::adder_without_round::adder_without_round_run;
@@ -12,15 +17,38 @@ use crate::ten_adder_LG::PA; //関数をimport
 mod ten_adder_OPA;
 use crate::ten_adder_OPA::OPA; //関数をimport
 
+
+
+
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+pub struct Args {
+    #[arg(short, long)]
+    adder: String,
+}
+
+
+
 /*
     let input1:u32 = 0b1100_0000_1000_0101; // bfloat16 
     let input2:u32 = 0b0000_0110_1000_0011; // bfloat16
-    の16bitをランダム生成にして、10000回ほどループで回して,それをassert_eq!で比較する.
+    の16bitをランダム生成にして、10000回ほどループで回して,それを assert_eq!で比較する.
 */
 fn main() {
+
+    let args = Args::parse();
     
-    // let input1:u32 = 0b1_01111110_0000101; // bfloat16 
-    // let input2:u32 = 0b0_01111110_0000011; // bfloat16 
+    let adder_type = match args.adder.as_str() {
+        "Default" => AdderType::Default,
+        "WithoutRound" => AdderType::WithoutRound,
+        "ByCmpl" => AdderType::ByCmpl,
+        "TenAdderLG" => AdderType::TenAdderLG,
+        "TenAdderOPA" => AdderType::TenAdderOPA,
+        _ => panic!(" /// Invalid adder type \"{}\" /// ", args.adder.as_str()),
+    };
+    println!("adder type is \"{}\" ", adder_type);
+    
+
     let contents = fs::read_to_string("src/w_value_bin.txt")
         .expect("Something went wrong reading the file");
 
@@ -36,11 +64,32 @@ fn main() {
     let mut output_list = Vec::new();
     for i in (0..bin_values.len()).step_by(2) {
 
-        // let output = adder_without_round::adder_without_round_run(bin_values[i], bin_values[i+1]);
-        // let output = float_adder_run(bin_values[i], bin_values[i+1]);
-        let output = adder_with_cmpl_run(bin_values[i], bin_values[i+1]);
-        output_list.push(output);
+    // ****************************************************** //
+    // *********************  ここで計算方法を変える ********************* //
+    // ****************************************************** //
+    let output:u32;
+    if AdderType::Default == adder_type {
+        output = float_adder_run(bin_values[i], bin_values[i+1]);
+    }else if AdderType::WithoutRound == adder_type {
+        output = adder_without_round::adder_without_round_run(bin_values[i], bin_values[i+1]);
+    }else if AdderType::ByCmpl == adder_type {
+        output = adder_with_cmpl_run(bin_values[i], bin_values[i+1]
+        , adder_type);
+    }else if AdderType::TenAdderLG == adder_type {
+        output = adder_with_cmpl_run(bin_values[i], bin_values[i+1]
+        , adder_type);
 
+    }else if AdderType::TenAdderOPA == adder_type {
+        output = adder_with_cmpl_run(bin_values[i], bin_values[i+1]
+        , adder_type);
+    }
+    else {
+        panic!(" /// Invalid adder type \"{}\" /// ", adder_type);
+    }
+    
+
+
+    output_list.push(output);
     }
 
     //// write to file as segment is ","
@@ -54,17 +103,6 @@ fn main() {
     fs::write("src/w_self_add_result.txt", output_str).expect("Unable to write file");
 
 
-
-    // println!("### float adder by ieee ###");
-    // let ieeef32_1 = ieee_to_f32( bfloat16_to_ieee(input1 as u16) );
-    // let ieeef32_2 = ieee_to_f32( bfloat16_to_ieee(input2 as u16) );
-    // println!("ieeef32_1: {}", ieeef32_1);
-    // println!("ieeef32_2: {}", ieeef32_2);
-    // let res_f32 = ieeef32_1 + ieeef32_2;
-    // let res_u32 = f32_to_ieee(res_f32);
-    // println!("res_f32: {}", res_f32);
-    // println!("res_u32: {:0>32b}",  res_u32);
-    // assert_eq!(output, res_u32 >> 16);
 }
 
 fn float_adder_run(input1:u32, input2:u32)->u32 {

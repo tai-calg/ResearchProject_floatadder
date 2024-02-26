@@ -1,13 +1,19 @@
 use std::cmp;
+use crate::clap_args::AdderType;
+use crate::ten_adder_LG::PA_interface_main;
+use crate::ten_adder_OPA::OPA_interface_main;
+
+
 // ビット列を分離(分割)したら，それぞれ別の変数として分けた方が可読性が良い．
 
+    // ##test##
     // println!("{}", 1<<4-1); 
     // println!("{}", 0b01100); //12
     // println!("{}", !(0b01100)+1);
     // assert!( (!(0b01100)+1) == (0b01100 * -1) );
     // println!("succeess");
 
-pub fn adder_with_cmpl_run(input1:u32, input2:u32)->u32 {
+pub fn adder_with_cmpl_run(input1:u32, input2:u32, ty:AdderType )->u32 {
 
     // === procedual 1 : swap ===
         let sign_mask = 0b1000_0000_0000_0000; // [15]
@@ -55,11 +61,14 @@ pub fn adder_with_cmpl_run(input1:u32, input2:u32)->u32 {
         fract_a |= 0b0000_0000_1000_0000; //hidden bitを結合, 8bit
         fract_b |= 0b0000_0000_1000_0000; //hidden bitを結合, 8bit
     
-    // === toCmpl. ===
+
+
+
+    // === procedual 1.5 : toCmpl. ===
     let xor = sign_a ^ sign_b;
     if xor { // case sub
         // 10bitであるfract_a をbit反転 , +1 
-        fract_a = ( (!fract_a & 0xf_f_f_f_f) + 1 ) ; //GRS 10bit+shift max scaler 10bit
+        fract_a =  (!fract_a & 0xf_f_f_f_f) + 1  ; 
             // !shifted_fr_aはu32で32bitすべてが反転するのでダメ
         assert!( (!(0b01100)+1) == (0b01100 * -1) );
 
@@ -91,7 +100,7 @@ pub fn adder_with_cmpl_run(input1:u32, input2:u32)->u32 {
     
     
         let mut shift_val = cmp::min(exp_b - exp_a,10);  
-        // これによってfract_aを分離したい
+        // shift_valによって fract_a を分離したい
         // (fract_a >> n) into shifted_fr_a
         let for_round_b4grs = fract_a & ((1<<shift_val) - 1);
         assert!( ((1<<4) -1) == 0b1111); 
@@ -102,9 +111,21 @@ pub fn adder_with_cmpl_run(input1:u32, input2:u32)->u32 {
     
     
     // === procedual 3 : add , sub ===
-        let addsub_result = (shifted_fr_a + fract_b) & 0b01_1111_1111; //9bit, because 10bit as sign bit must be 0. 
+    let addsub_result;
+    if ty == AdderType::ByCmpl {
+        addsub_result = (shifted_fr_a + fract_b) & 0b01_1111_1111; //9bit, because 10bit as sign bit must be 0. 
         assert!(( (shifted_fr_a + fract_b) & 0b10_0000_0000 ) == 0); // 10th bit is 0
-            
+    }else if ty == AdderType::TenAdderLG {
+        addsub_result = PA_interface_main(shifted_fr_a, fract_b);
+        
+
+    }else if ty == AdderType::TenAdderOPA {
+        //TODO addsub_result = (shifted_fr_a + fract_b) & 0b01_1111_1111; //9bit, because 10bit as sign bit must be 0. 
+        addsub_result = OPA_interface_main(shifted_fr_a, fract_b);
+
+    }else {
+        addsub_result = (shifted_fr_a + fract_b) & 0b01_1111_1111; //9bit, because 10bit as sign bit must be 0. 
+    }
     
     // === procedual 4 : normalize ===
         let mut guard = false;
@@ -123,8 +144,8 @@ pub fn adder_with_cmpl_run(input1:u32, input2:u32)->u32 {
             if (addsub_result & (floor_mask<<1)) != 0 { // (桁あがりしてる時) 
                 exp += 1;
 
-                // result_bind = result_bind >> 1;// shiftval=0,1の時だけここで情報ロスが起こる．
-                //### ならば， >>1するのではなく，マスクを左に1ずらす！ ###
+                // result_bind = result_bind >> 1; // shiftval=0,1の時だけここで情報ロスが起こる．
+                //→### それならば， >>1するのではなく，マスクを左に1ずらす！ ###
                 shift_val += 1;
     
             }
