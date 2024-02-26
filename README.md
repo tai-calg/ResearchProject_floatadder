@@ -13,7 +13,7 @@ tensorflow version == 2.13.0
 4. 最後にcompare.pyによって，"2.","3."で作ったtxt(加算結果の約5000個の16bit)が全て正しいか比較する。
 
 
-![float-adder-github drawio](https://github.com/tai-calg/ResearchProject_floatadder/img/float-adder-github.png)
+![float-adder-github drawio](/img/float-adder-github.png)
 
 ## 使い方
 
