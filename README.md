@@ -18,16 +18,21 @@ tensorflow version == 2.13.0
 ## 使い方
 
 ### 全体の流れ
-`
+```
 $ python gen_random_bin.py
+
 $ python bfloat.py
+
 $ cargo run  --  --adder Default
+
 $ python compare.py 
-`
+```
 
 #### 使用する計算方法を選択する
 `cargo run  --  --adder [AdderName]`でBfloat16加算器の内部処理回路の変更ができます．
+
 選択肢は以下の通りです．
+
 `cargo run  --  --adder Default` ... 卒業論文，付録部(図7.1)に記載された補数表現を使用しないBfloat16加算器
 
 `cargo run  --  --adder ByCmpl`   ...  卒業論文，第二章に記した補数表現を使用するBfloat16加算器
