@@ -74,7 +74,7 @@ p_epalu = 1.0445 * 1000.0 #fJ/FPAO
 ax.broken_barh([(0, p_epalu)], (0, 9), facecolors='#33bb54', label='EPALU')
 
 # p_OPNAの描画
-start = 0
+start :float = 0
 colors = ['#ffff33', 'y','#000000', 'm','#ff0000','#888888']
 for i, power in enumerate(power_OPNA):
     ax.broken_barh([(start, power)], (10, 9), facecolors=colors[i], label=components_OPNA[i])

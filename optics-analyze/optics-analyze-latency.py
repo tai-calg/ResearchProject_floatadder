@@ -8,9 +8,9 @@ late_mzi = 0.4758
 late_dc = 0.2334
 late_ps = 0.009043
 late_mrr = 0.3664
-late_pd = 40
-late_adc1 = 10
-late_dac1 = 10
+late_pd = 40.0
+late_adc1 = 10.0
+late_dac1 = 10.0
 late_adc11 = 330.0
 late_dac10 = 125.0
 late_awg = 186.7
@@ -47,7 +47,7 @@ ax.broken_barh([(0, late_bf16a)], (30, 9), facecolors='#ffaa00', label='10bitAdd
 
 
 # p_WMAUの描画
-start = 0
+start = 0.0
 colors = ['#0083ff','#ffff33','#ffaadd','#ff7070']
 for i, latency in enumerate(late_WMAU_list):
     ax.broken_barh([(start, latency)], (20, 9), facecolors=colors[i], label=late_WMAU_namelist[i])
