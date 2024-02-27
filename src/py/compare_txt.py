@@ -24,6 +24,7 @@ with open(w_value_bin_path,"r") as file:
 
 # compare #
 count = 0
+print("all count is",len(self_bin_strs))
 for i in range(len(self_bin_strs)):
     if self_bin_strs[i] != tf_bin_strs[i]:
         count += 1
