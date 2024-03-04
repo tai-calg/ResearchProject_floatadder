@@ -49,7 +49,7 @@ pub fn OPA_interface_main(shifted_fr_a:u32, fract_b:u32)-> u32{
     let p_list_f64 = p_list.iter().map(|x| if *x {1.0} else {0.0}).collect::<Vec<f64>>();
     let g_list_f64 = g_list.iter().map(|x| if *x {1.0} else {0.0}).collect::<Vec<f64>>();
     
-    let g_i0_list : [f64;10] = OPA_without_YBranch_attenuation(
+    let g_i0_list : [f64;10] = OPA(
         p_list_f64[0], p_list_f64[1], p_list_f64[2], p_list_f64[3], p_list_f64[4], p_list_f64[5], p_list_f64[6], p_list_f64[7], p_list_f64[8], p_list_f64[9],
         g_list_f64[0], g_list_f64[1], g_list_f64[2], g_list_f64[3], g_list_f64[4], g_list_f64[5], g_list_f64[6], g_list_f64[7], g_list_f64[8], g_list_f64[9]
     );
@@ -57,7 +57,7 @@ pub fn OPA_interface_main(shifted_fr_a:u32, fract_b:u32)-> u32{
     // *** ADC_1 process *** //
     // ADCの閾値は0.2くらいが最適？それでも8442/50000のエラーが出る．
     // for g_i0_list.map(|x| if x>=0.1 {1} else {0})
-    let g_i0_list_bool=g_i0_list.iter().map(|x| if *x > 0.2 {true} else {false}).collect::<Vec<bool>>();
+    let g_i0_list_bool=g_i0_list.iter().map(|x| if *x > 0.1 {true} else {false}).collect::<Vec<bool>>();
 
 
     let (s_list,c10) = SGU(
@@ -102,10 +102,10 @@ fn dc_or(pa:f64,pb:f64)->f64 {
     return pout;
 }
 
-fn square_block(Pi:f64, Pj:f64, Gi:f64, Gj:f64)->(f64,f64) {
-    let Pij = psi_and(Pi/2.0,Pj);
-    let Gij = dc_or(psi_and(Pj/2.0, Gi), Gj);
-    return (Pij,Gij);
+fn square_block(pi:f64, pj:f64, gi:f64, gj:f64)->(f64,f64) {
+    let pij = psi_and(pi/2.0,pj);
+    let gij = dc_or(psi_and(pj/2.0, gi), gj);
+    return (pij,gij);
 }
 
 

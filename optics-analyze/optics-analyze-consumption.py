@@ -21,18 +21,32 @@ Name , Power [fJ/回], Latency[s]
     DAC_10, 350.1, 0.125 e-9
     Multiplexer(AWG), 0, 1.867 e-10
     """
+    
+"""
+p_pd	1.2
+p_psi	1.7
+p_ps	0
+p_dc	0
+p_logic	2.112998933
+p_adc1	4.00E+00
+p_adc11	4.10E+03
+p_dac10	4.36E+00
+p_awg	0
+p_mrr	7
+"""
 
+# [fJ/bit]
 p_mzi = 32.4
-p_dc = 16.2
+p_dc = 0.0
 p_ps = 0.0
-p_mrr = 24.0
+p_mrr = 7.0
 p_pd = 1.2
-p_adc1 = 270.0
-p_dac1 = 153.0
-p_adc11 = 1059.0
-p_dac10 = 350.1
+p_adc1 = 4.0
+# p_dac1 = .0
+p_adc11 = 4100.0
+p_dac10 = 4.36
 p_psi = 1.7
-p_lg = 5*1/2516 *1000.0 #fJ/once
+p_lg = 1.79 / 336.7 / 2516* 1000000 # 2.113 fJ/bit
 
 
 
@@ -53,77 +67,78 @@ fig, ax = plt.subplots()
 
 # ~~~ with EPALU version ~~~ #
 
-# p_ebfa_fJperFPAOの描画
-### 電気回路の割合を帯グラフで描画する
-p_ebfa = 1.79 #mW 
-p_ebfa_fJperFPAO = p_ebfa / 336.7 *1000.0 *1000.0 #fJ/FPAO
-p_e10ad_fJperFPAO = p_ebfa_fJperFPAO * (345/(905+96+354+138+38+345+609+31))
-p_ebfa_else_fJperFPAO = p_ebfa_fJperFPAO - p_e10ad_fJperFPAO
-# ax.broken_barh([(0, p_ebfa_else_fJperFPAO)], (11, 10), facecolors='#00ff00', label='else')
-ax.broken_barh([(0, p_e10ad_fJperFPAO)], (30, 9), facecolors='#ffaa00', label='10bitAdder')
+# # # p_ebfa_fJperFPAOの描画
+# ## 電気回路の割合を帯グラフで描画する
+# p_ebfa = 1.79 #mW 
+# p_ebfa_fJperFPAO = p_ebfa / 336.7 *1000.0 *1000.0 #fJ/FPAO
+# p_e10ad_fJperFPAO = p_ebfa_fJperFPAO * (345/(905+96+354+138+38+345+609+31))
+# p_ebfa_else_fJperFPAO = p_ebfa_fJperFPAO - p_e10ad_fJperFPAO
+# # ax.broken_barh([(0, p_ebfa_else_fJperFPAO)], (11, 10), facecolors='#00ff00', label='else')
+# ax.broken_barh([(0, p_e10ad_fJperFPAO)], (30, 9), facecolors='#ffaa00', label='10bitAdder')
 
 
 
-# p_WMAUの描画
-ax.broken_barh([(0, power_WMAU[0])], (20, 9), facecolors='#0083ff', label=components_WMAU[0])
-ax.broken_barh([(power_WMAU[0], power_WMAU[1])], (20, 9), facecolors='#ffff33')
-ax.broken_barh([(sum(power_WMAU[:2]), power_WMAU[2])], (20, 9), facecolors='#ff7070', label=components_WMAU[2])
+# # p_WMAUの描画
+# ax.broken_barh([(0, power_WMAU[0])], (20, 9), facecolors='#0083ff', label=components_WMAU[0])
+# ax.broken_barh([(power_WMAU[0], power_WMAU[1])], (20, 9), facecolors='#ffff33')
+# ax.broken_barh([(sum(power_WMAU[:2]), power_WMAU[2])], (20, 9), facecolors='#ff7070', label=components_WMAU[2])
 
-# p_epalu の描画
-p_epalu = 1.0445 * 1000.0 #fJ/FPAO
-ax.broken_barh([(0, p_epalu)], (0, 9), facecolors='#33bb54', label='EPALU')
+# # p_epalu の描画
+# p_epalu = 1.0445 * 1000.0 #fJ/FPAO
+# ax.broken_barh([(0, p_epalu)], (0, 9), facecolors='#33bb54', label='EPALU')
 
-# p_OPNAの描画
-start :float = 0
-colors = ['#ffff33', 'y','#000000', 'm','#ff0000','#888888']
-for i, power in enumerate(power_OPNA):
-    ax.broken_barh([(start, power)], (10, 9), facecolors=colors[i], label=components_OPNA[i])
-    start += power
+# # p_OPNAの描画
+# start :float = 0
+# colors = ['#ffff33', 'y','#000000', 'm','#ff0000','#888888']
+# for i, power in enumerate(power_OPNA):
+#     ax.broken_barh([(start, power)], (10, 9), facecolors=colors[i], label=components_OPNA[i])
+#     start += power
 
-# グラフの設定
-ax.set_ylim(0, 40)
-ax.set_xlim(0, max(sum(power_WMAU)+1000, sum(power_OPNA)+1000, p_e10ad_fJperFPAO+1000 ))
-ax.set_xlabel('Energy [fJ/FPAO]')
-ax.set_yticks([5, 15, 25, 35])
-ax.set_yticklabels(['E_EPALU','E_OPA', 'E_WMA', 'E_RTL10A' ])
-ax.grid(False)
+# # グラフの設定
+# ax.set_ylim(0, 40)
+# ax.set_xlim(0, max(sum(power_WMAU)+1000, sum(power_OPNA)+1000, p_e10ad_fJperFPAO+1000 ))
+# ax.set_xlabel('Energy [fJ/FPAO]')
+# ax.set_yticks([5, 15, 25, 35])
+# ax.set_yticklabels(['E_EPALU','E_OPA', 'E_WMA', 'E_RTL10A' ])
+# ax.grid(False)
 
 
 
 
 # ~~~ without EPALU version ~~~ #
 
-# p_ebfa_fJperFPAOの描画
-### 電気回路の割合を帯グラフで描画する
-# p_ebfa = 1.79 #mW 
-# p_ebfa_fJperFPAO = p_ebfa / 336.7 *1000.0 *1000.0 #fJ/FPAO
-# p_e10ad_fJperFPAO = p_ebfa_fJperFPAO * (345/(905+96+354+138+38+345+609+31))
-# p_ebfa_else_fJperFPAO = p_ebfa_fJperFPAO - p_e10ad_fJperFPAO
-# # ax.broken_barh([(0, p_ebfa_else_fJperFPAO)], (11, 10), facecolors='#00ff00', label='else')
-# ax.broken_barh([(0, p_e10ad_fJperFPAO)], (20, 9), facecolors='#ffaa00', label='10bitAdder')
+## p_ebfa_fJperFPAOの描画
+## 電気回路の割合を帯グラフで描画する
+p_ebfa = 1.79 #mW 
+p_ebfa_fJperFPAO = p_ebfa / 336.7 *1000.0 *1000.0 #fJ/FPAO
+p_e10ad_fJperFPAO = p_ebfa_fJperFPAO * (345/(905+96+354+138+38+345+609+31))
+p_ebfa_else_fJperFPAO = p_ebfa_fJperFPAO - p_e10ad_fJperFPAO
+# ax.broken_barh([(0, p_ebfa_else_fJperFPAO)], (11, 10), facecolors='#00ff00', label='else')
+ax.broken_barh([(0, p_e10ad_fJperFPAO)], (20, 9), facecolors='#ffaa00', label='10bitAdder')
 
 
 
-# # p_WMAUの描画
-# ax.broken_barh([(0, power_WMAU[0])], (10, 9), facecolors='#0083ff', label=components_WMAU[0])
-# ax.broken_barh([(power_WMAU[0], power_WMAU[1])], (10, 9), facecolors='#ffff33')
-# ax.broken_barh([(sum(power_WMAU[:2]), power_WMAU[2])], (10, 9), facecolors='#ff2060', label=components_WMAU[2])
+# p_WMAUの描画
+ax.broken_barh([(0, power_WMAU[0])], (10, 9), facecolors='#0083ff', label=components_WMAU[0])
+ax.broken_barh([(power_WMAU[0], power_WMAU[1])], (10, 9), facecolors='#ffff33')
+ax.broken_barh([(sum(power_WMAU[:2]), power_WMAU[2])], (10, 9), facecolors='#ff7070', label=components_WMAU[2])
 
 
-# # p_OPNAの描画
-# start = 0
-# colors = ['#ffff33', 'y', 'm','#ff0000']
-# for i, power in enumerate(power_OPNA):
-#     ax.broken_barh([(start, power)], (0, 9), facecolors=colors[i], label=components_OPNA[i])
-#     start += power
+# p_OPAの描画
+start = 0.0
+colors = ['#ffff33', 'y','#000000', 'm','#ff0000','#888888']
+
+for i, power in enumerate(power_OPNA):
+    ax.broken_barh([(start, power)], (0, 9), facecolors=colors[i], label=components_OPNA[i])
+    start += power
     
-# # グラフの設定 without_EPALU
-# ax.set_ylim(0, 30)
-# ax.set_xlim(0, max(sum(power_WMAU)+300, sum(power_OPNA)+300, p_e10ad_fJperFPAO+300 ))
-# ax.set_xlabel('Power [fJ/once]')
-# ax.set_yticks([5, 15,25])
-# ax.set_yticklabels(['P_OPNA', 'P_WMAU', 'P_bf16a' ])
-# ax.grid(False)
+# グラフの設定 without_EPALU
+ax.set_ylim(0, 30)
+ax.set_xlim(0, max(sum(power_WMAU)+300, sum(power_OPNA)+300, p_e10ad_fJperFPAO+300 ))
+ax.set_xlabel('Energy [fJ]')
+ax.set_yticks([5, 15,25])
+ax.set_yticklabels(['E_OPA', 'E_WMAU', 'E_RTL10A' ])
+ax.grid(False)
 
 # ~~~ end of without EPALU version ~~~ #
 

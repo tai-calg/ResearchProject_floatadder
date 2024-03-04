@@ -49,7 +49,7 @@ fn main() {
     println!("adder type is \"{}\" ", adder_type);
     
 
-    let contents = fs::read_to_string("src/w_value_bin.txt")
+    let contents = fs::read_to_string("src/py/w_value_bin.txt")
         .expect("Something went wrong reading the file");
 
     // 文字列の前後の空白を削除し、カンマで分割する
@@ -100,7 +100,7 @@ fn main() {
             output_str.push_str(",");
         }
     }
-    fs::write("src/w_self_add_result.txt", output_str).expect("Unable to write file");
+    fs::write("src/py/w_self_add_result.txt", output_str).expect("Unable to write file");
 
 
 }

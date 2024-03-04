@@ -25,7 +25,7 @@ late_WMAU_list = [late_dac10, late_mrr, late_awg, late_adc11]
 late_WMAU_namelist = ['DAC_10', 'MRR', 'AWG', 'ADC_11']
 
 late_OPA = late_logicgate+late_mrr+late_dc+late_psi*4. + late_adc1 + late_logicgate 
-late_OPA_list = [late_mrr, late_dc, late_psi*4., late_adc1, late_logicgate*2]
+late_OPA_list = [late_mrr, late_dc*4., late_psi*4., late_adc1, late_logicgate*2]
 late_OPA_namelist = ['MRR', 'DC', 'PSI_AND', 'ADC_1', 'LogicGate']
 
 late_EPALU = 50.0 #ps
