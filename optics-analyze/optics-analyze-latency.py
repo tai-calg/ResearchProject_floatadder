@@ -64,14 +64,14 @@ for i, latency in enumerate(late_WMAU_list):
     # ax.broken_barh([(sum(power_WMAU[:2]), power_WMAU[2])], (20, 9), facecolors='#ff7070', label=components_WMAU[2])
 
 # p_epalu の描画
-ax.broken_barh([(0, late_EPALU)], (0, 9), facecolors='#33bb54', label='EPALU')
+ax.broken_barh([(0, late_EPALU)], (10, 9), facecolors='#33bb54', label='EPALU')
 
 # p_OPAの描画
 start = 0
 # colors = ['#ffff33', 'y', 'm','#ff0000','#888888']
 colors = ['#ffff33', 'y', 'm','#888888']
 for i, latency in enumerate(late_OPA_list):
-    ax.broken_barh([(start, latency)], (10, 9), facecolors=colors[i], label=late_OPA_namelist[i])
+    ax.broken_barh([(start, latency)], (0, 9), facecolors=colors[i], label=late_OPA_namelist[i])
     start += latency
 
 # グラフの設定
