@@ -21,12 +21,16 @@ late_logicgate = 38.0
 late_bf16a = 2.97*12/78 *1000.0 #ps
 
 late_WMAU = late_dac10+late_mrr+late_awg+late_adc11
-late_WMAU_list = [late_dac10, late_mrr, late_awg, late_adc11]
-late_WMAU_namelist = ['DAC_10', 'MRR', 'AWG', 'ADC_11']
+# late_WMAU_list = [late_dac10, late_mrr, late_awg, late_adc11]
+late_WMAU_list = [late_adc11]
+# late_WMAU_namelist = ['DAC_10', 'MRR', 'AWG', 'ADC_11']
+late_WMAU_namelist = ['ADC_11']
 
 late_OPA = late_logicgate+late_mrr+late_dc+late_psi*4. + late_adc1 + late_logicgate 
-late_OPA_list = [late_mrr, late_dc*4., late_psi*4., late_adc1, late_logicgate*2]
-late_OPA_namelist = ['MRR', 'DC', 'PSI_AND', 'ADC_1', 'LogicGate']
+# late_OPA_list = [late_mrr, late_dc*4., late_psi*4., late_adc1, late_logicgate*2]
+late_OPA_list = [late_mrr, late_dc*4., late_psi*4., late_logicgate*2]
+# late_OPA_namelist = ['MRR', 'DC', 'PSI_AND', 'ADC_1', 'LogicGate']
+late_OPA_namelist = ['MRR', 'DC', 'PSI_AND', 'LogicGate']
 
 late_EPALU = 50.0 #ps
 
@@ -48,7 +52,8 @@ ax.broken_barh([(0, late_bf16a)], (30, 9), facecolors='#ffaa00', label='10bitAdd
 
 # p_WMAUの描画
 start = 0.0
-colors = ['#0083ff','#ffff33','#ffaadd','#ff7070']
+# colors = ['#0083ff','#ffff33','#ffaadd','#ff7070']
+colors = ['#ff7070']
 for i, latency in enumerate(late_WMAU_list):
     ax.broken_barh([(start, latency)], (20, 9), facecolors=colors[i], label=late_WMAU_namelist[i])
     start += latency
@@ -63,7 +68,8 @@ ax.broken_barh([(0, late_EPALU)], (0, 9), facecolors='#33bb54', label='EPALU')
 
 # p_OPAの描画
 start = 0
-colors = ['#ffff33', 'y', 'm','#ff0000','#888888']
+# colors = ['#ffff33', 'y', 'm','#ff0000','#888888']
+colors = ['#ffff33', 'y', 'm','#888888']
 for i, latency in enumerate(late_OPA_list):
     ax.broken_barh([(start, latency)], (10, 9), facecolors=colors[i], label=late_OPA_namelist[i])
     start += latency
