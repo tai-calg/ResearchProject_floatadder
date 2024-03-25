@@ -1,6 +1,6 @@
 use std::cmp;
 use crate::clap_args::AdderType;
-use crate::ten_adder_LG::PA_interface_main;
+use crate::ten_adder_LG::{PA_interface_main, PA_interface_main_with_cin};
 use crate::ten_adder_OPA::OPA_interface_main;
 
 
@@ -68,11 +68,13 @@ pub fn adder_with_cmpl_run(input1:u32, input2:u32, ty:AdderType )->u32 {
     let xor = sign_a ^ sign_b;
     if xor { // case sub
         // 10bitであるfract_a をbit反転 , +1 
-        fract_a =  (!fract_a & 0xf_f_f_f_f) + 1  ; 
-            // !shifted_fr_aはu32で32bitすべてが反転するのでダメ
-        assert!( (!(0b01100)+1) == (0b01100 * -1) );
+        // !shifted_fr_aはu32で32bitすべてが反転して＋1でオーバーフローするのでダメ
 
-        /*    
+        fract_a =  (!fract_a & 0b0011_1111_1111_1111_1111) + 1  ; // 10+8bit , >> shift で左から1が補填されるようにする．
+        // fract_a =  (!fract_a & 0xf_f_f_f_f)  ; // ! cin=1を後で与える．→ダメ．RGSに正しい値が入らなくなる． 
+        
+        /*    general TEST
+        assert!( (!(0b01100)+1) == (0b01100 * -1) );
         println!("{}", 0b01100);
         println!("{}", !(0b01100)+1);
         assert!( (!(0b01100)+1) == (0b01100 * -1) );
@@ -80,7 +82,7 @@ pub fn adder_with_cmpl_run(input1:u32, input2:u32, ty:AdderType )->u32 {
         */
         
     }else{ // case add
-        //nothing to do
+
     }
 
 
@@ -103,7 +105,7 @@ pub fn adder_with_cmpl_run(input1:u32, input2:u32, ty:AdderType )->u32 {
         // shift_valによって fract_a を分離したい
         // (fract_a >> n) into shifted_fr_a
         let for_round_b4grs = fract_a & ((1<<shift_val) - 1);
-        assert!( ((1<<4) -1) == 0b1111); 
+        // assert!( ((1<<4) -1) == 0b1111); 
         let mut shifted_fr_a = fract_a >> shift_val; 
 
 
@@ -116,7 +118,12 @@ pub fn adder_with_cmpl_run(input1:u32, input2:u32, ty:AdderType )->u32 {
         addsub_result = (shifted_fr_a + fract_b) & 0b01_1111_1111; //9bit, because 10bit as sign bit must be 0. 
         assert!(( (shifted_fr_a + fract_b) & 0b10_0000_0000 ) == 0); // 10th bit is 0
     }else if ty == AdderType::TenAdderLG {
-        addsub_result = PA_interface_main(shifted_fr_a, fract_b);
+        // if xor & (shift_val==0) { // cin=1
+            // addsub_result = PA_interface_main_with_cin(shifted_fr_a, fract_b, true );
+        // }else {
+            addsub_result = PA_interface_main(shifted_fr_a, fract_b);
+        // }
+
         
 
     }else if ty == AdderType::TenAdderOPA {

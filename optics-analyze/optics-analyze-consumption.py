@@ -69,60 +69,14 @@ fig, ax = plt.subplots()
 
 # ~~~ with EPALU version ~~~ #
 
-# # p_ebfa_fJperFPAOの描画
-## 電気回路の割合を帯グラフで描画する
-p_ebfa = 1.79 #mW 
-p_ebfa_fJperFPAO = p_ebfa / 336.7 *1000.0 *1000.0 #fJ/FPAO
-p_e10ad_fJperFPAO = p_ebfa_fJperFPAO * (345/(905+96+354+138+38+345+609+31))
-p_ebfa_else_fJperFPAO = p_ebfa_fJperFPAO - p_e10ad_fJperFPAO
-# ax.broken_barh([(0, p_ebfa_else_fJperFPAO)], (11, 10), facecolors='#00ff00', label='else')
-ax.broken_barh([(0, p_e10ad_fJperFPAO)], (30, 9), facecolors='#ffaa00', label='10bitAdder')
-
-
-
-# p_WMAの描画
-start = 0.0
-color = ['#DC143C','#0083ff','#ffff33', '#ff7070']
-for i , power in enumerate(power_WMAU):
-    ax.broken_barh([(start, power)], (20, 9), facecolors=color[i], label=components_WMAU[i])
-    start += power
-
-# p_epalu の描画
-p_epalu = 1.0445 * 1000.0 #fJ/FPAO
-ax.broken_barh([(0, p_epalu)], (10, 9), facecolors='#33bb54', label='EPALU')
-
-# p_OPAの描画
-start = 0.0
-colors = ['#DC143C','#ffff33', 'y','#000000' ,'#ff0000','#888888']
-
-for i, power in enumerate(power_OPNA):
-    if components_OPNA[i] == 'LASER' or components_OPNA[i] == 'MRR':
-        ax.broken_barh([(start, power)], (0, 9), facecolors=colors[i])
-    else : 
-        ax.broken_barh([(start, power)], (0, 9), facecolors=colors[i], label=components_OPNA[i])
-    start += power
-
-# グラフの設定
-ax.set_ylim(0, 40)
-ax.set_xlim(0, max(sum(power_WMAU)+3000, sum(power_OPNA)+3000, p_e10ad_fJperFPAO+3000 ))
-ax.set_xlabel('Energy [fJ/FPAO]')
-ax.set_yticks([5, 15, 25, 35])
-ax.set_yticklabels(['E_OPA','E_EPALU', 'E_WMA', 'E_RTL10A' ])
-ax.grid(False)
-
-
-
-
-# ~~~ without EPALU version ~~~ #
-
-# # p_ebfa_fJperFPAOの描画
-# # 電気回路の割合を帯グラフで描画する
+# # # p_ebfa_fJperFPAOの描画
+# ## 電気回路の割合を帯グラフで描画する
 # p_ebfa = 1.79 #mW 
 # p_ebfa_fJperFPAO = p_ebfa / 336.7 *1000.0 *1000.0 #fJ/FPAO
 # p_e10ad_fJperFPAO = p_ebfa_fJperFPAO * (345/(905+96+354+138+38+345+609+31))
 # p_ebfa_else_fJperFPAO = p_ebfa_fJperFPAO - p_e10ad_fJperFPAO
 # # ax.broken_barh([(0, p_ebfa_else_fJperFPAO)], (11, 10), facecolors='#00ff00', label='else')
-# ax.broken_barh([(0, p_e10ad_fJperFPAO)], (20, 9), facecolors='#ffaa00', label='10bitAdder')
+# ax.broken_barh([(0, p_e10ad_fJperFPAO)], (30, 9), facecolors='#ffaa00', label='10bitAdder')
 
 
 
@@ -130,9 +84,12 @@ ax.grid(False)
 # start = 0.0
 # color = ['#DC143C','#0083ff','#ffff33', '#ff7070']
 # for i , power in enumerate(power_WMAU):
-#     ax.broken_barh([(start, power)], (10, 9), facecolors=color[i], label=components_WMAU[i])
+#     ax.broken_barh([(start, power)], (20, 9), facecolors=color[i], label=components_WMAU[i])
 #     start += power
 
+# # p_epalu の描画
+# p_epalu = 1.0445 * 1000.0 #fJ/FPAO
+# ax.broken_barh([(0, p_epalu)], (10, 9), facecolors='#33bb54', label='EPALU')
 
 # # p_OPAの描画
 # start = 0.0
@@ -145,13 +102,56 @@ ax.grid(False)
 #         ax.broken_barh([(start, power)], (0, 9), facecolors=colors[i], label=components_OPNA[i])
 #     start += power
 
-
-# ax.set_ylim(0, 30)
-# ax.set_xlim(0, max(sum(power_WMAU)+300, sum(power_OPNA)+300, p_e10ad_fJperFPAO+300 ))
-# ax.set_xlabel('Energy [fJ]')
-# ax.set_yticks([5, 15,25])
-# ax.set_yticklabels(['E_OPA', 'E_WMA', 'E_RTL10A' ])
+# # グラフの設定
+# ax.set_ylim(0, 40)
+# ax.set_xlim(0, max(sum(power_WMAU)+3000, sum(power_OPNA)+3000, p_e10ad_fJperFPAO+3000 ))
+# ax.set_xlabel('Energy [fJ/FPAO]')
+# ax.set_yticks([5, 15, 25, 35])
+# ax.set_yticklabels(['E_OPA','E_EPALU', 'E_WMA', 'E_RTL10A' ])
 # ax.grid(False)
+
+
+
+
+# ~~~ without EPALU version ~~~ #
+
+# p_ebfa_fJperFPAOの描画
+# 電気回路の割合を帯グラフで描画する
+p_ebfa = 1.79 #mW 
+p_ebfa_fJperFPAO = p_ebfa / 336.7 *1000.0 *1000.0 #fJ/FPAO
+p_e10ad_fJperFPAO = p_ebfa_fJperFPAO * (345/(905+96+354+138+38+345+609+31))
+p_ebfa_else_fJperFPAO = p_ebfa_fJperFPAO - p_e10ad_fJperFPAO
+# ax.broken_barh([(0, p_ebfa_else_fJperFPAO)], (11, 10), facecolors='#00ff00', label='else')
+ax.broken_barh([(0, p_e10ad_fJperFPAO)], (20, 9), facecolors='#ffaa00', label='10bitAdder')
+
+
+
+# p_WMAの描画
+start = 0.0
+color = ['#DC143C','#0083ff','#ffff33', '#ff7070']
+for i , power in enumerate(power_WMAU):
+    ax.broken_barh([(start, power)], (10, 9), facecolors=color[i], label=components_WMAU[i])
+    start += power
+
+
+# p_OPAの描画
+start = 0.0
+colors = ['#DC143C','#ffff33', 'y','#000000' ,'#ff0000','#888888']
+
+for i, power in enumerate(power_OPNA):
+    if components_OPNA[i] == 'LASER' or components_OPNA[i] == 'MRR':
+        ax.broken_barh([(start, power)], (0, 9), facecolors=colors[i])
+    else : 
+        ax.broken_barh([(start, power)], (0, 9), facecolors=colors[i], label=components_OPNA[i])
+    start += power
+
+
+ax.set_ylim(0, 30)
+ax.set_xlim(0, max(sum(power_WMAU)+300, sum(power_OPNA)+300, p_e10ad_fJperFPAO+300 ))
+ax.set_xlabel('Energy [fJ]')
+ax.set_yticks([5, 15,25])
+ax.set_yticklabels(['E_OPA', 'E_WMA', 'E_RTL10A' ])
+ax.grid(False)
 
 # ~~~ end of without EPALU version ~~~ #
 
